@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "@/lib/utils"; // Import polyfills
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

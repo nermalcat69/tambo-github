@@ -30,8 +30,8 @@ export function Timeline({ commits = [], issues = [], prs = [], maxItems = 20 }:
         id: commit.sha,
         type: 'commit',
         title: commit.commit.message.split('\n')[0],
-        author: commit.commit.author.name,
-        date: commit.commit.author.date,
+        author: commit.commit.author?.name || 'Unknown author',
+        date: commit.commit.author?.date || commit.commit.committer?.date || new Date().toISOString(),
         url: commit.html_url,
         data: commit
       });
@@ -43,7 +43,7 @@ export function Timeline({ commits = [], issues = [], prs = [], maxItems = 20 }:
         id: `issue-${issue.id}`,
         type: 'issue',
         title: issue.title,
-        author: issue.user.login,
+        author: issue.user?.login || 'Unknown user',
         date: issue.created_at,
         url: issue.html_url,
         data: issue
@@ -56,7 +56,7 @@ export function Timeline({ commits = [], issues = [], prs = [], maxItems = 20 }:
         id: `pr-${pr.id}`,
         type: 'pr',
         title: pr.title,
-        author: pr.user.login,
+        author: pr.user?.login || 'Unknown user',
         date: pr.created_at,
         url: pr.html_url,
         data: pr

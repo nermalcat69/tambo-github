@@ -20,11 +20,27 @@ export const getRepository = async (input: z.infer<typeof repoInputSchema>) => {
   }
 };
 
-export const searchRepositories = async (input: { query: string; per_page?: number }) => {
+export const searchRepositories = async (input: { q: string; per_page?: number }) => {
   try {
-    return await githubAPI.searchRepositories(input.query, input.per_page);
+    return await githubAPI.searchRepositories(input.q, input.per_page);
   } catch (error) {
     throw new Error(`Failed to search repositories: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+export const getOrganizationRepositories = async (input: { org: string; per_page?: number }) => {
+  try {
+    return await githubAPI.getOrganizationRepositories(input.org, input.per_page);
+  } catch (error) {
+    throw new Error(`Failed to fetch organization repositories: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+export const getUserRepositories = async (input: { username: string; per_page?: number }) => {
+  try {
+    return await githubAPI.getUserRepositories(input.username, input.per_page);
+  } catch (error) {
+    throw new Error(`Failed to fetch user repositories: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 
@@ -163,7 +179,7 @@ export const analyzeRepository = async (input: z.infer<typeof repoInputSchema>) 
 
 // Input schemas for tools
 export const searchRepositoriesInputSchema = z.object({
-  query: z.string().describe("Search query for repositories"),
+  q: z.string().describe("Search query for repositories"),
   per_page: z.number().min(1).max(100).default(30).optional().describe("Number of results per page"),
 });
 

@@ -11,13 +11,22 @@ interface PRAnalysis {
 }
 
 interface PRCardProps {
-  pr: GitHubPR;
+  pr?: GitHubPR;
   analysis?: PRAnalysis;
   onSelect?: (pr: GitHubPR) => void;
   isSelected?: boolean;
 }
 
 export function PRCard({ pr, analysis, onSelect, isSelected = false }: PRCardProps) {
+  // Handle undefined pr prop
+  if (!pr) {
+    return (
+      <div className="border rounded-md p-3 border-gray-200 bg-gray-50">
+        <div className="text-xs text-gray-500">Pull request data not available</div>
+      </div>
+    );
+  }
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -79,35 +88,35 @@ export function PRCard({ pr, analysis, onSelect, isSelected = false }: PRCardPro
   return (
     <div 
       className={`
-        border rounded-lg p-4 cursor-pointer transition-all duration-200
+        border rounded-md p-3 cursor-pointer transition-all duration-200
         hover:border-gray-300 hover:shadow-sm
         ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}
       `}
       onClick={() => onSelect?.(pr)}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2">
         <div className="mt-1">
           {getStatusIcon()}
         </div>
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="font-medium text-gray-900 line-clamp-2 pr-2">
+          <div className="flex items-start justify-between mb-1.5">
+            <h3 className="font-medium text-sm text-gray-900 line-clamp-2 pr-2">
               {pr.title}
             </h3>
-            <span className="text-sm text-gray-500 whitespace-nowrap">
+            <span className="text-xs text-gray-500 whitespace-nowrap">
               #{pr.number}
             </span>
           </div>
 
-          <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+          <div className="flex items-center gap-2 text-xs text-gray-600 mb-1.5">
             <span className={getStatusColor()}>
               {getStatusText()}
             </span>
             <span>•</span>
             <div className="flex items-center gap-1">
               <User className="w-3 h-3" />
-              <span>{pr.user.login}</span>
+              <span>{pr.user?.login || 'Unknown user'}</span>
             </div>
             <span>•</span>
             <div className="flex items-center gap-1">
@@ -117,9 +126,9 @@ export function PRCard({ pr, analysis, onSelect, isSelected = false }: PRCardPro
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center gap-3 text-xs text-gray-600">
               <div className="flex items-center gap-1">
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className="w-3 h-3" />
                 <span>{pr.comments || 0}</span>
               </div>
               <div className="text-xs">
@@ -154,13 +163,13 @@ export function PRCard({ pr, analysis, onSelect, isSelected = false }: PRCardPro
           </div>
 
           {analysis && (
-            <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
-              <div className="flex items-center gap-2 mb-2">
-                <Brain className="w-4 h-4 text-blue-600" />
-                <span className="text-sm font-medium text-gray-900">AI Analysis</span>
+            <div className="mt-2 p-2 bg-gray-50 rounded-md border">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Brain className="w-3 h-3 text-blue-600" />
+                <span className="text-xs font-medium text-gray-900">AI Analysis</span>
               </div>
               
-              <p className="text-sm text-gray-700 mb-2">
+              <p className="text-xs text-gray-700 mb-1.5">
                 {analysis.summary}
               </p>
               
@@ -189,8 +198,8 @@ export function PRCard({ pr, analysis, onSelect, isSelected = false }: PRCardPro
           )}
           
           {!analysis && pr.body && (
-            <p className="text-sm text-gray-700 mt-2 line-clamp-2">
-              {pr.body.substring(0, 120)}...
+            <p className="text-xs text-gray-700 mt-1.5 line-clamp-2">
+              {pr.body.substring(0, 100)}...
             </p>
           )}
         </div>

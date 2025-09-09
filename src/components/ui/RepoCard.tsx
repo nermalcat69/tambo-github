@@ -4,13 +4,25 @@ import { GitHubRepo } from "@/lib/types";
 import { Star, GitFork, Eye, Calendar, ExternalLink } from "lucide-react";
 
 interface RepoCardProps {
-  repo: GitHubRepo;
+  repo?: GitHubRepo;
   onSelect?: (repo: GitHubRepo) => void;
   isSelected?: boolean;
 }
 
 export function RepoCard({ repo, onSelect, isSelected = false }: RepoCardProps) {
-  const formatNumber = (num: number) => {
+  // Handle undefined repo prop
+  if (!repo) {
+    return (
+      <div className="border rounded-lg p-4 border-gray-200 bg-gray-50">
+        <div className="text-sm text-gray-500">Repository data not available</div>
+      </div>
+    );
+  }
+
+  const formatNumber = (num: number | undefined) => {
+    if (num == null || num === undefined) {
+      return '0';
+    }
     if (num >= 1000) {
       return `${(num / 1000).toFixed(1)}k`;
     }
@@ -29,49 +41,51 @@ export function RepoCard({ repo, onSelect, isSelected = false }: RepoCardProps) 
   return (
     <div 
       className={`
-        border rounded-lg p-4 cursor-pointer transition-all duration-200
+        border rounded-md p-3 cursor-pointer transition-all duration-200
         hover:border-gray-300 hover:shadow-sm
         ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}
       `}
       onClick={() => onSelect?.(repo)}
     >
-      <div className="flex items-start justify-between mb-2">
+      <div className="flex items-start justify-between mb-1.5">
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-gray-900 truncate">
+          <h3 className="font-medium text-sm text-gray-900 truncate">
             {repo.name}
           </h3>
-          <p className="text-sm text-gray-600 truncate">
-            {repo.owner.login}
+          <p className="text-xs text-gray-600 truncate">
+            {repo.owner?.login || 'Unknown owner'}
           </p>
         </div>
-        <a
-          href={repo.html_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gray-400 hover:text-gray-600 ml-2"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <ExternalLink className="w-4 h-4" />
-        </a>
+        {repo.html_url && (
+          <a
+            href={repo.html_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-400 hover:text-gray-600 ml-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        )}
       </div>
 
       {repo.description && (
-        <p className="text-sm text-gray-700 mb-3 line-clamp-2">
+        <p className="text-xs text-gray-700 mb-2 line-clamp-2">
           {repo.description}
         </p>
       )}
 
-      <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+      <div className="flex items-center gap-3 text-xs text-gray-600 mb-2">
         <div className="flex items-center gap-1">
-          <Star className="w-4 h-4" />
+          <Star className="w-3 h-3" />
           <span>{formatNumber(repo.stargazers_count)}</span>
         </div>
         <div className="flex items-center gap-1">
-          <GitFork className="w-4 h-4" />
+          <GitFork className="w-3 h-3" />
           <span>{formatNumber(repo.forks_count)}</span>
         </div>
         <div className="flex items-center gap-1">
-          <Eye className="w-4 h-4" />
+          <Eye className="w-3 h-3" />
           <span>{formatNumber(repo.watchers_count)}</span>
         </div>
       </div>

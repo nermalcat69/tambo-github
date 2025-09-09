@@ -10,13 +10,22 @@ interface IssueClassification {
 }
 
 interface IssueCardProps {
-  issue: GitHubIssue;
+  issue?: GitHubIssue;
   classification?: IssueClassification;
   onSelect?: (issue: GitHubIssue) => void;
   isSelected?: boolean;
 }
 
 export function IssueCard({ issue, classification, onSelect, isSelected = false }: IssueCardProps) {
+  // Handle undefined issue prop
+  if (!issue) {
+    return (
+      <div className="border rounded-md p-3 border-gray-200 bg-gray-50">
+        <div className="text-xs text-gray-500">Issue data not available</div>
+      </div>
+    );
+  }
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -69,35 +78,35 @@ export function IssueCard({ issue, classification, onSelect, isSelected = false 
   return (
     <div 
       className={`
-        border rounded-lg p-4 cursor-pointer transition-all duration-200
+        border rounded-md p-3 cursor-pointer transition-all duration-200
         hover:border-gray-300 hover:shadow-sm
         ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}
       `}
       onClick={() => onSelect?.(issue)}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2">
         <div className="mt-1">
           {getStatusIcon()}
         </div>
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="font-medium text-gray-900 line-clamp-2 pr-2">
+          <div className="flex items-start justify-between mb-1.5">
+            <h3 className="font-medium text-sm text-gray-900 line-clamp-2 pr-2">
               {issue.title}
             </h3>
-            <span className="text-sm text-gray-500 whitespace-nowrap">
+            <span className="text-xs text-gray-500 whitespace-nowrap">
               #{issue.number}
             </span>
           </div>
 
-          <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+          <div className="flex items-center gap-2 text-xs text-gray-600 mb-1.5">
             <span className={getStatusColor()}>
               {issue.state.charAt(0).toUpperCase() + issue.state.slice(1)}
             </span>
             <span>•</span>
             <div className="flex items-center gap-1">
               <User className="w-3 h-3" />
-              <span>{issue.user.login}</span>
+              <span>{issue.user?.login || 'Unknown user'}</span>
             </div>
             <span>•</span>
             <div className="flex items-center gap-1">
@@ -107,14 +116,14 @@ export function IssueCard({ issue, classification, onSelect, isSelected = false 
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center gap-3 text-xs text-gray-600">
               <div className="flex items-center gap-1">
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className="w-3 h-3" />
                 <span>{issue.comments || 0}</span>
               </div>
               {issue.assignees && issue.assignees.length > 0 && (
                 <div className="flex items-center gap-1">
-                  <User className="w-4 h-4" />
+                  <User className="w-3 h-3" />
                   <span>{issue.assignees.length} assigned</span>
                 </div>
               )}
@@ -145,10 +154,10 @@ export function IssueCard({ issue, classification, onSelect, isSelected = false 
           </div>
 
           {classification && (
-            <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
-              <div className="flex items-center gap-2 mb-2">
-                <Brain className="w-4 h-4 text-blue-600" />
-                <span className="text-sm font-medium text-gray-900">AI Classification</span>
+            <div className="mt-2 p-2 bg-gray-50 rounded-md border">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Brain className="w-3 h-3 text-blue-600" />
+                <span className="text-xs font-medium text-gray-900">AI Classification</span>
               </div>
               
               <div className="flex items-center gap-3 text-xs">
@@ -179,8 +188,8 @@ export function IssueCard({ issue, classification, onSelect, isSelected = false 
           )}
           
           {!classification && issue.body && (
-            <p className="text-sm text-gray-700 mt-2 line-clamp-2">
-              {issue.body.substring(0, 120)}...
+            <p className="text-xs text-gray-700 mt-1.5 line-clamp-2">
+              {issue.body.substring(0, 100)}...
             </p>
           )}
         </div>

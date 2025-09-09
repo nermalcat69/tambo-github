@@ -152,9 +152,28 @@ class GitHubAPI {
       q: query,
       per_page: per_page.toString(),
     });
-
     const data = await this.request<{ items: any[] }>(`/search/repositories?${params}`);
     return data.items.map(item => githubRepoSchema.parse(item));
+  }
+
+  async getOrganizationRepositories(org: string, per_page = 30): Promise<GitHubRepo[]> {
+    const params = new URLSearchParams({
+      per_page: per_page.toString(),
+      sort: 'updated',
+      direction: 'desc'
+    });
+    const data = await this.request<any[]>(`/orgs/${org}/repos?${params}`);
+    return data.map(item => githubRepoSchema.parse(item));
+  }
+
+  async getUserRepositories(username: string, per_page = 30): Promise<GitHubRepo[]> {
+    const params = new URLSearchParams({
+      per_page: per_page.toString(),
+      sort: 'updated',
+      direction: 'desc'
+    });
+    const data = await this.request<any[]>(`/users/${username}/repos?${params}`);
+    return data.map(item => githubRepoSchema.parse(item));
   }
 
   async getRateLimit() {
