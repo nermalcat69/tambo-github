@@ -9,7 +9,6 @@ export type ResolvedIntent =
   | { kind: "list_issues"; params: { owner: string; repo: string; state?: "open" | "closed" | "all"; per_page?: number } }
   | { kind: "list_prs"; params: { owner: string; repo: string; state?: "open" | "closed" | "all"; per_page?: number } }
   | { kind: "list_commits"; params: { owner: string; repo: string; sha?: string; per_page?: number } }
-  | { kind: "list_org_issues"; params: { org: string; state?: "open" | "closed" | "all"; assignee?: string; per_page?: number } }
   | { kind: "summarize_repo"; params: { owner: string; repo: string } };
 
 export const resolveGitHubIntentInputSchema = z.object({
@@ -150,22 +149,6 @@ export function resolveGitHubIntent(input: z.infer<typeof resolveGitHubIntentInp
     return { kind: "list_user_repos", params: { username: owner, per_page: count } };
   }
 
-  // 3) Check for org-wide issues
-  const orgIssuesMatch = text.match(/\b(?:issues?|bugs)\b.*\b(?:across|in|from)\s+([a-z0-9-_]+)\s+(?:org|organization|repos?)\b/i);
-  if (orgIssuesMatch) {
-    const orgName = orgIssuesMatch[1]; // Extract the organization name from the match
-    const assigneeMatch = text.match(/\b(without|no|unassigned)\s+(?:assignee|assigned)\b/i);
-    const state = normalizeState(text.match(/\b(open|opened|closed|close|all|any|merged|resolved)\b/i)?.[1]);
-    return {
-      kind: "list_org_issues",
-      params: {
-        org: orgName,
-        state: state || "open",
-        assignee: assigneeMatch ? "none" : undefined,
-        per_page: count
-      }
-    };
-  }
 
   // 4) Fall back to search for more complex queries
   const q = buildSearchQuery(owner, language, topic, text /* keep extra words as keywords */);

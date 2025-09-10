@@ -65,83 +65,6 @@ export const getRepositoryIssues = async (input: z.infer<typeof issuesInputSchem
   }
 };
 
-// Org-wide Issues Tool
-export const listOrganizationIssues = async (input: {
-  org: string;
-  state?: "open" | "closed" | "all";
-  assignee?: string; // "none" for unassigned
-  per_page?: number;
-}) => {
-  try {
-    const { org, state = "open", assignee, per_page = 30 } = input;
-    
-    console.log(`[GitHub Tools] Starting listOrganizationIssues for org: ${org}, state: ${state}, assignee: ${assignee}, per_page: ${per_page}`);
-
-    // First, get all repositories in the organization
-    console.log(`[GitHub Tools] Fetching repositories for organization: ${org}`);
-    const repos = await githubAPI.getOrganizationRepositories(org, 20); // Fetch up to 100 repos
-    
-    if (!repos || repos.length === 0) {
-      console.log(`[GitHub Tools] No repositories found for organization: ${org}`);
-      return [];
-    }
-    
-    console.log(`[GitHub Tools] Found ${repos.length} repositories for organization: ${org}`);
-
-    // Fetch issues from all repos, but limit parallel requests to avoid rate limits
-    const batchSize = 5; // Process repos in smaller batches to avoid rate limits
-    let allIssues: any[] = [];
-    
-    for (let i = 0; i < repos.length; i += batchSize) {
-      const batch = repos.slice(i, i + batchSize);
-      console.log(`[GitHub Tools] Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(repos.length / batchSize)} (${batch.length} repos)`);
-      
-      const batchPromises = batch.map(async (repo) => {
-        try {
-          console.log(`[GitHub Tools] Fetching issues from ${org}/${repo.name}`);
-          const issues = await githubAPI.getRepositoryIssues({
-            owner: org,
-            repo: repo.name,
-            state,
-            assignee: assignee === "none" ? undefined : assignee, // Pass assignee to API when not "none"
-            per_page: Math.min(per_page, 30), // Limit per repo to avoid too many results
-          });
-          console.log(`[GitHub Tools] Found ${issues.length} issues in ${org}/${repo.name}`);
-          return issues;
-        } catch (error) {
-          console.warn(`[GitHub Tools] Failed to fetch issues from ${org}/${repo.name}:`, error);
-          return [];
-        }
-      });
-
-      const batchResults = await Promise.all(batchPromises);
-      allIssues.push(...batchResults.flat());
-      
-      // Add small delay between batches to respect rate limits
-      if (i + batchSize < repos.length) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-    }
-
-    console.log(`[GitHub Tools] Total issues before filtering: ${allIssues.length}`);
-
-    // Filter for unassigned if requested and not already handled by API
-    if (assignee === "none") {
-      allIssues = allIssues.filter(issue => !issue.assignees || issue.assignees.length === 0);
-      console.log(`[GitHub Tools] Issues after filtering for unassigned: ${allIssues.length}`);
-    }
-
-    // Sort by created_at descending and limit
-    allIssues.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    const limitedIssues = allIssues.slice(0, per_page);
-
-    console.log(`[GitHub Tools] Final result: ${limitedIssues.length} ${state} issues across ${repos.length} repos in ${org}`);
-    return limitedIssues;
-  } catch (error) {
-    console.error('[GitHub Tools] Failed to list organization issues:', error);
-    throw new Error(`Failed to list organization issues: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-};
 
 // Pull Requests Tools
 export const getRepositoryPRs = async (input: z.infer<typeof prsInputSchema>) => {
@@ -422,13 +345,6 @@ export const analyzePRInputSchema = z.object({
   pr_number: z.number().describe("Pull request number")
 });
 
-// Schema for listOrganizationIssues
-export const listOrganizationIssuesInputSchema = z.object({
-  org: z.string().describe("Organization name"),
-  state: z.enum(["open", "closed", "all"]).default("open").describe("Issue state"),
-  assignee: z.string().optional().describe("Assignee filter ('none' for unassigned)"),
-  per_page: z.number().min(1).max(100).default(30).describe("Number of issues to return"),
-});
 
 export const classifyIssueInputSchema = z.object({
   owner: z.string().describe("Repository owner"),
