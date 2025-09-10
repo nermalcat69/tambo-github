@@ -7,9 +7,9 @@ export type ResolvedIntent =
   | { kind: "list_org_repos"; params: { org: string; per_page?: number } }
   | { kind: "list_user_repos"; params: { username: string; per_page?: number } }
   | { kind: "list_issues"; params: { owner: string; repo: string; state?: "open" | "closed" | "all"; per_page?: number } }
+  | { kind: "list_org_issues"; params: { org: string; state?: "open" | "closed" | "all"; per_page?: number } }
   | { kind: "list_prs"; params: { owner: string; repo: string; state?: "open" | "closed" | "all"; per_page?: number } }
-  | { kind: "list_commits"; params: { owner: string; repo: string; sha?: string; per_page?: number } }
-  | { kind: "summarize_repo"; params: { owner: string; repo: string } };
+  | { kind: "list_commits"; params: { owner: string; repo: string; sha?: string; per_page?: number } };
 
 export const resolveGitHubIntentInputSchema = z.object({
   input: z.string().min(1).describe("Natural language request, e.g. 'grab me 10 repos from tambo-ai org'"),
@@ -54,6 +54,10 @@ function extractFullName(text: string): { owner: string; repo: string } | undefi
   if (slash) return { owner: slash[1], repo: slash[2] };
   const repoWord = text.match(/\brepo\s+([a-z0-9-_]+)\/([a-z0-9-_.]+)\b/i);
   if (repoWord) return { owner: repoWord[1], repo: repoWord[2] };
+  
+  // Handle "from owner/repo" pattern
+  const fromRepo = text.match(/\bfrom\s+([a-z0-9-_]+)\/([a-z0-9-_.]+)\b/i);
+  if (fromRepo) return { owner: fromRepo[1], repo: fromRepo[2] };
   
   // Handle special case for "tamb repo" -> "tambo-ai/tambo"
   if (/\btamb\s+repo\b/i.test(text)) {
@@ -104,21 +108,12 @@ export function resolveGitHubIntent(input: z.infer<typeof resolveGitHubIntentInp
   const { input: textRaw, fallback_per_page } = resolveGitHubIntentInputSchema.parse(input);
   const text = textRaw.trim();
 
-  // 1) Check for summarization requests first
-  const isSummarization = /\b(summarize|summary|analyze|overview|describe)\b/i.test(text);
-  if (isSummarization) {
-    const full = extractFullName(text);
-    if (full) {
-      return { kind: "summarize_repo", params: full };
-    }
-  }
-
-  // 2) Direct repo reference?
+  // 1) Direct repo reference?
   const full = extractFullName(text);
   if (full) {
     // If they asked about issues/PRs/commits explicitly, route accordingly
     const lane = extractLane(text);
-    const state = normalizeState(text.match(/\b(open|opened|closed|close|all|any|merged|resolved)\b/i)?.[1]);
+    const state = normalizeState(text.match(/\b(open|opened|closed|close|all|any|merged|resolved)\b/i)?.[1]) || "all";
     const perPage = extractCount(text) ?? fallback_per_page;
 
     if (lane === "issues") return { kind: "list_issues", params: { ...full, state, per_page: perPage } };
@@ -130,8 +125,26 @@ export function resolveGitHubIntent(input: z.infer<typeof resolveGitHubIntentInp
     return { kind: "get_repo", params: full };
   }
 
-  // 2) Check for organization/user repository listing patterns
+  // Extract owner early for org-level detection
   const owner = extractOwner(text);
+  
+  // Detect org-level issues (owner/org + lane="issues" without repo)
+  const lane = extractLane(text);
+  const state = normalizeState(text.match(/\b(open|opened|closed|close|all|any|merged|resolved)\b/i)?.[1]) || "all";
+  const perPage = extractCount(text) ?? fallback_per_page;
+
+  if (lane === "issues" && owner && !full) {
+    // Check if it's org-level (no repo specified) - must explicitly mention "org" or "organization"
+    const isOrgIssues = /\b(?:list|show|get|grab|fetch|all)\b.*\bissues?\b.*\b(?:from|of|in)\s+([a-z0-9-_]+)\s+(?:org|organization)\b/i.test(text);
+    // Make sure it's not actually a repo reference like "vercel/examples"
+    const isRepoReference = /\bfrom\s+([a-z0-9-_]+)\/([a-z0-9-_.]+)\b/i.test(text);
+    
+    if (isOrgIssues && !isRepoReference) {
+      return { kind: "list_org_issues", params: { org: owner, state, per_page: perPage } };
+    }
+  }
+
+  // 2) Check for organization/user repository listing patterns
   const count = extractCount(text) ?? fallback_per_page;
   const { language, topic } = extractFilters(text);
 

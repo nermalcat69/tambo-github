@@ -85,6 +85,12 @@ export const githubPRSchema = z.object({
   base: z.object({
     ref: z.string(),
     sha: z.string(),
+    repo: z.object({
+      name: z.string(),
+      owner: z.object({
+        login: z.string(),
+      }),
+    }),
   }),
   changed_files: z.number().optional(),
   additions: z.number().optional(),
@@ -133,11 +139,13 @@ export const repoInputSchema = z.object({
 
 export const issuesInputSchema = z.object({
   owner: z.string().describe("Repository owner"),
-  repo: z.string().describe("Repository name"),
+  repo: z.string().optional().describe("Repository name (required for repo-level, omitted for org-wide)"),
+  org: z.string().optional().describe("Organization name for org-wide issues"),
   state: z.enum(["open", "closed", "all"]).default("open").describe("Issue state filter"),
   labels: z.string().optional().describe("Comma-separated list of label names"),
   assignee: z.string().optional().describe("Username of assignee"),
   per_page: z.number().min(1).max(100).default(30).describe("Number of results per page"),
+  page: z.number().optional().describe("Page number for pagination"),
 });
 
 export const prsInputSchema = z.object({

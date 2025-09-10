@@ -2,22 +2,15 @@
 
 import { GitHubIssue } from "@/lib/types";
 import { useChatInput } from "@/contexts/chat-input-context";
-import { AlertCircle, MessageCircle, Calendar, User, CheckCircle, XCircle, Bug, FileText, Lightbulb, Brain, Clock, Sparkles } from "lucide-react";
-
-interface IssueClassification {
-  type: 'bug' | 'feature' | 'docs';
-  priority: 'normal' | 'high';
-  estimated_effort: 'small' | 'medium' | 'large';
-}
+import { AlertCircle, MessageCircle, Calendar, User, CheckCircle, XCircle, Bug, FileText, Lightbulb, Brain, Clock } from "lucide-react";
 
 interface IssueCardProps {
   issue?: GitHubIssue | unknown; // Allow raw objects for delegation
-  classification?: IssueClassification;
   onSelect?: (issue: GitHubIssue) => void;
   isSelected?: boolean;
 }
 
-export function IssueCard({ issue, classification, onSelect, isSelected = false }: IssueCardProps) {
+export function IssueCard({ issue, onSelect, isSelected = false }: IssueCardProps) {
   const { setInputValue } = useChatInput();
   // Handle undefined issue prop
   if (!issue) {
@@ -68,32 +61,6 @@ export function IssueCard({ issue, classification, onSelect, isSelected = false 
     return issueData.state === 'open' ? 'text-green-600' : 'text-purple-600';
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'bug': return <Bug className="w-3 h-3 text-red-600" />;
-      case 'feature': return <Lightbulb className="w-3 h-3 text-blue-600" />;
-      case 'docs': return <FileText className="w-3 h-3 text-green-600" />;
-      default: return <AlertCircle className="w-3 h-3 text-gray-600" />;
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'bug': return 'text-red-600 bg-red-50';
-      case 'feature': return 'text-blue-600 bg-blue-50';
-      case 'docs': return 'text-green-600 bg-green-50';
-      default: return 'text-gray-600 bg-gray-50';
-    }
-  };
-
-  const getEffortColor = (effort: string) => {
-    switch (effort) {
-      case 'large': return 'text-red-600 bg-red-50';
-      case 'medium': return 'text-yellow-600 bg-yellow-50';
-      case 'small': return 'text-green-600 bg-green-50';
-      default: return 'text-gray-600 bg-gray-50';
-    }
-  };
 
   const handleClick = () => {
     if (issueData.html_url) {
@@ -153,17 +120,6 @@ export function IssueCard({ issue, classification, onSelect, isSelected = false 
                   <span>{issueData.assignees.length} assigned</span>
                 </div>
               )}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setInputValue(`Summarize issue #${issueData.number}: ${issueData.title}`);
-                }}
-                className="flex items-center gap-1 text-purple-600 hover:text-purple-800 transition-colors"
-                title="Summarize issue"
-              >
-                <Sparkles className="w-3 h-3" />
-                <span>summarize</span>
-              </button>
             </div>
             
             {issueData.labels && issueData.labels.length > 0 && (
@@ -185,41 +141,8 @@ export function IssueCard({ issue, classification, onSelect, isSelected = false 
             )}
           </div>
 
-          {classification && (
-            <div className="mt-2 p-2 bg-gray-50 rounded-md border">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Brain className="w-3 h-3 text-blue-600" />
-                <span className="text-xs font-medium text-gray-900">AI Classification</span>
-              </div>
-              
-              <div className="flex items-center gap-3 text-xs">
-                <div className="flex items-center gap-1">
-                  {getTypeIcon(classification.type)}
-                  <span className="text-gray-600">Type:</span>
-                  <span className={`px-2 py-1 rounded-full ${getTypeColor(classification.type)}`}>
-                    {classification.type}
-                  </span>
-                </div>
-                
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  <span className="text-gray-600">Effort:</span>
-                  <span className={`px-2 py-1 rounded-full ${getEffortColor(classification.estimated_effort)}`}>
-                    {classification.estimated_effort}
-                  </span>
-                </div>
-                
-                {classification.priority === 'high' && (
-                  <div className="flex items-center gap-1 text-red-600">
-                    <AlertCircle className="w-3 h-3" />
-                    <span>High Priority</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
           
-          {!classification && issueData.body && (
+          {issueData.body && (
              <p className="text-xs text-gray-700 mt-1.5 line-clamp-2">
                {issueData.body?.substring(0, 100)}...
              </p>

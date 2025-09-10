@@ -27,10 +27,7 @@ import {
   unstarRepository,
   addIssueComment,
   addIssueLabels,
-  analyzeRepository,
-  analyzePullRequest,
-  classifyIssue,
-  generateReleaseNotes,
+  testGitHubAPI,
 } from "@/services/github-tools";
 import { resolveGitHubIntent } from "@/services/resolve-github-intent";
 
@@ -308,181 +305,13 @@ export const tools: TamboTool[] = [
     })),
   },
 
-  /* ------------------------------ AI / Analysis ----------------------------- */
   {
-    name: "analyzeRepository",
-    description: "AI analysis for repo health; accepts owner/org aliases.",
-    tool: analyzeRepository,
-    toolSchema: createTamboSchema(OwnerRepoSchema),
-  },
-  {
-    name: "analyzePullRequest",
+    name: "testGitHubAPI",
     description:
-      "AI analysis of a PR; accepts '#123' style pr_number; owner/org aliases; merge readiness insights.",
-    tool: analyzePullRequest,
-    toolSchema: createTamboSchema(z.object({
-      owner: z.string().min(1),
-      repo: z.string().min(1),
-      org: z.string().optional(),
-      full_name: z.string().optional(),
-      pr_number: CoercedNumber,
-    })),
+      "Test GitHub API connectivity and authentication. Useful for debugging API issues by testing with a known public repository.",
+    tool: testGitHubAPI,
+    toolSchema: createTamboSchema(z.object({})),
   },
-  {
-    name: "classifyIssue",
-    description:
-      "AI classification of an issue (type/effort/priority); accepts '#42' style issue_number.",
-    tool: classifyIssue,
-    toolSchema: createTamboSchema(z.object({
-      owner: z.string().min(1),
-      repo: z.string().min(1),
-      org: z.string().optional(),
-      full_name: z.string().optional(),
-      issue_number: CoercedNumber,
-    })),
-  },
-  {
-    name: "generateReleaseNotes",
-    description:
-      "AI-generated release notes between tags/commits. Accepts owner/org aliases; from_tag/to_tag optional.",
-    tool: generateReleaseNotes,
-    toolSchema: createTamboSchema(z.object({
-      owner: z.string().min(1),
-      repo: z.string().min(1),
-      org: z.string().optional(),
-      full_name: z.string().optional(),
-      from_tag: z.string().optional(),
-      to_tag: z.string().optional(),
-    })),
-  },
-  {
-    name: "summarizeRepository",
-    description:
-      "AI summarization of a repository based on its README, description, and metadata. Provides concise overview of what the repo does.",
-    tool: async (params: { owner: string; repo: string; org?: string; full_name?: string }) => {
-      try {
-        const { githubAPI } = await import("@/services/github-api");
-        
-        // Get repository info and README
-        const [repoInfo, readmeData] = await Promise.all([
-          githubAPI.getRepository({ owner: params.owner, repo: params.repo }),
-          githubAPI.getRepositoryReadme({ owner: params.owner, repo: params.repo })
-        ]);
-        
-        let readmeContent = "";
-        if (readmeData) {
-          // Decode base64 content
-          readmeContent = readmeData.encoding === 'base64' 
-            ? atob(readmeData.content.replace(/\s/g, ''))
-            : readmeData.content;
-        }
-        
-        // Create a concise summary
-        const summary = `**${repoInfo.name}** - ${repoInfo.description || 'No description available'}\n\n` +
-          `**Language:** ${repoInfo.language || 'Not specified'}\n` +
-          `**Stars:** ${repoInfo.stargazers_count} | **Forks:** ${repoInfo.forks_count}\n\n` +
-          (readmeContent ? `**Overview:** ${readmeContent.substring(0, 300)}...` : 'No README available');
-        
-        return { summary };
-      } catch (error) {
-        console.error('Error summarizing repository:', error);
-        return { summary: `Error summarizing repository: ${error instanceof Error ? error.message : 'Unknown error'}` };
-      }
-    },
-    toolSchema: createTamboSchema(z.object({
-      owner: z.string().min(1),
-      repo: z.string().min(1),
-      org: z.string().optional(),
-      full_name: z.string().optional(),
-    })),
-  },
-  {
-    name: "summarizePullRequest",
-    description:
-      "AI summarization of a pull request based on its diff, title, description, and comments. Analyzes code changes and impact.",
-    tool: async (params: { owner: string; repo: string; pr_number: number; org?: string; full_name?: string }) => {
-      try {
-        const { githubAPI } = await import("@/services/github-api");
-        
-        // Get PR info, diff, and comments
-        const [prInfo, diff, comments] = await Promise.all([
-          githubAPI.getPullRequest({ owner: params.owner, repo: params.repo }, params.pr_number),
-          githubAPI.getPullRequestDiff({ owner: params.owner, repo: params.repo }, params.pr_number),
-          githubAPI.getPullRequestComments({ owner: params.owner, repo: params.repo }, params.pr_number)
-        ]);
-        
-        // Analyze diff for key changes
-        const diffLines = diff.split('\n');
-        const addedLines = diffLines.filter(line => line.startsWith('+')).length;
-        const removedLines = diffLines.filter(line => line.startsWith('-')).length;
-        const filesChanged = (diff.match(/diff --git/g) || []).length;
-        
-        // Create summary
-        const summary = `**PR #${params.pr_number}: ${prInfo.title}**\n\n` +
-          `**Status:** ${prInfo.state} | **Author:** ${prInfo.user?.login}\n` +
-          `**Changes:** ${filesChanged} files, +${addedLines} additions, -${removedLines} deletions\n\n` +
-          `**Description:** ${prInfo.body?.substring(0, 200) || 'No description'}...\n\n` +
-          `**Comments:** ${comments.length} review comments`;
-        
-        return { summary };
-      } catch (error) {
-        console.error('Error summarizing PR:', error);
-        return { summary: `Error summarizing PR: ${error instanceof Error ? error.message : 'Unknown error'}` };
-      }
-    },
-    toolSchema: createTamboSchema(z.object({
-      owner: z.string().min(1),
-      repo: z.string().min(1),
-      pr_number: CoercedNumber,
-      org: z.string().optional(),
-      full_name: z.string().optional(),
-    })),
-  },
-  {
-    name: "summarizeIssue",
-    description:
-      "AI summarization of an issue based on its title, description, comments, and labels. Provides context and key points.",
-    tool: async (params: { owner: string; repo: string; issue_number: number; org?: string; full_name?: string }) => {
-      try {
-        const { githubAPI } = await import("@/services/github-api");
-        
-        // Get issue info and comments
-        const [issueInfo, comments] = await Promise.all([
-          githubAPI.getIssue({ owner: params.owner, repo: params.repo }, params.issue_number),
-          githubAPI.getIssueComments({ owner: params.owner, repo: params.repo }, params.issue_number)
-        ]);
-        
-        // Extract labels
-        const labels = issueInfo.labels?.map((label: any) => label.name).join(', ') || 'None';
-        
-        // Get recent comments
-        const recentComments = comments.slice(-3).map((comment: any) => 
-          `${comment.user?.login}: ${comment.body?.substring(0, 100)}...`
-        ).join('\n');
-        
-        // Create summary
-        const summary = `**Issue #${params.issue_number}: ${issueInfo.title}**\n\n` +
-          `**Status:** ${issueInfo.state} | **Author:** ${issueInfo.user?.login}\n` +
-          `**Labels:** ${labels}\n\n` +
-          `**Description:** ${issueInfo.body?.substring(0, 200) || 'No description'}...\n\n` +
-          `**Activity:** ${comments.length} comments` +
-          (recentComments ? `\n\n**Recent Comments:**\n${recentComments}` : '');
-        
-        return { summary };
-      } catch (error) {
-        console.error('Error summarizing issue:', error);
-        return { summary: `Error summarizing issue: ${error instanceof Error ? error.message : 'Unknown error'}` };
-      }
-    },
-    toolSchema: createTamboSchema(z.object({
-      owner: z.string().min(1),
-      repo: z.string().min(1),
-      issue_number: CoercedNumber,
-      org: z.string().optional(),
-      full_name: z.string().optional(),
-    })),
-  },
-
 
 ];
 

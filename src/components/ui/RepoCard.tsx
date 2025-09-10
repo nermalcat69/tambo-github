@@ -68,14 +68,11 @@ export function RepoCard({ repo, onSelect, isSelected = false }: RepoCardProps) 
     }
   };
 
-  const handleSummarize = () => {
-    setInputValue(`Summarize the repository ${repoData.owner?.login}/${repoData.name}`);
-  };
 
   return (
     <div 
       className="
-        border rounded-md p-3 cursor-pointer transition-all duration-200
+        border rounded-md p-3 transition-all duration-200
         hover:border-gray-300 border-gray-200 bg-white
       "
       onClick={() => onSelect?.(repoData)}
@@ -166,7 +163,7 @@ export function RepoCard({ repo, onSelect, isSelected = false }: RepoCardProps) 
               e.stopPropagation();
               handleActionClick('prs');
             }}
-            className="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center justify-center gap-1.5"
+            className="cursor-pointer flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center justify-center gap-1.5"
           >
             <GitPullRequest className="w-3.5 h-3.5" />
             Show PRs
@@ -176,7 +173,7 @@ export function RepoCard({ repo, onSelect, isSelected = false }: RepoCardProps) 
               e.stopPropagation();
               handleActionClick('issues');
             }}
-            className="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center justify-center gap-1.5"
+            className="cursor-pointer flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center justify-center gap-1.5"
           >
             <AlertCircle className="w-3.5 h-3.5" />
             Show Issues
@@ -188,7 +185,7 @@ export function RepoCard({ repo, onSelect, isSelected = false }: RepoCardProps) 
               e.stopPropagation();
               handleSummarize();
             }}
-            className="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center justify-center gap-1.5"
+            className="cursor-pointer flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center justify-center gap-1.5"
           >
             <Sparkles className="w-3.5 h-3.5" />
             Summarize

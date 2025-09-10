@@ -56,13 +56,27 @@ export function ObjectRenderer({ data, index = 0, onSelect, isSelected = false }
     );
   }
 
-  // Detect PR objects
-  if (obj.id && obj.title && obj.number && obj.state && obj.head && obj.base) {
+  // Detect PR objects - add debug logging
+  const isPR = obj.id && obj.title && obj.number && obj.state && obj.html_url && obj.user?.login && obj.head && obj.base?.repo?.owner?.login;
+  console.log('[ObjectRenderer] PR Detection:', {
+    hasId: !!obj.id,
+    hasTitle: !!obj.title,
+    hasNumber: !!obj.number,
+    hasState: !!obj.state,
+    hasHtmlUrl: !!obj.html_url,
+    hasUserLogin: !!obj.user?.login,
+    hasHead: !!obj.head,
+    hasBaseRepoOwner: !!obj.base?.repo?.owner?.login,
+    isPR,
+    keys: Object.keys(obj).slice(0, 10) // First 10 keys for debugging
+  });
+  
+  if (isPR) {
     return (
-      <PRCard 
-        pr={obj} 
-        onSelect={onSelect} 
-        isSelected={isSelected} 
+      <PRCard
+        pr={obj}
+        onSelect={onSelect}
+        isSelected={isSelected}
       />
     );
   }

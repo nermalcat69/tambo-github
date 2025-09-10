@@ -42,25 +42,40 @@ class GitHubAPI {
       "User-Agent": "tambo-github-tool",
       ...(options.headers as Record<string, string> || {}),
     };
-
+  
     if (this.token) {
       headers["Authorization"] = `Bearer ${this.token}`;
     }
-
+  
     try {
       const response = await fetch(url, {
         ...options,
         headers,
       });
-
+  
       if (!response.ok) {
         const errorText = await response.text();
-        throw new GitHubAPIError(
-          `GitHub API error: ${response.status} ${response.statusText} - ${errorText}`,
-          response.status
-        );
+        let errorMessage = `GitHub API error: ${response.status} ${response.statusText} - ${errorText}`;
+        
+        // Enhanced error handling for fine-grained PAT permissions
+        if (response.status === 403) {
+          if (!this.token) {
+            errorMessage += '\nNo GitHub token provided. Set GITHUB_TOKEN for private repos/orgs.';
+          } else {
+            errorMessage += '\nToken may lack required permissions for this endpoint. For fine-grained PATs:';
+            errorMessage += '\n- Repo issues: "Issues: read" permission';
+            errorMessage += '\n- Org search: "search" permission';
+            errorMessage += '\n- Check your PAT permissions at https://github.com/settings/tokens';
+          }
+          console.error(`[GitHub API] Permission issue: ${errorMessage}`);
+        } else if (response.status === 404) {
+          errorMessage += '\nRepository or organization not found, or access denied. Check the owner/repo name and your token permissions.';
+          console.error(`[GitHub API] Not found: ${errorMessage}`);
+        }
+        
+        throw new GitHubAPIError(errorMessage, response.status);
       }
-
+  
       const data = await response.json();
       return data;
     } catch (error) {
@@ -79,42 +94,144 @@ class GitHubAPI {
   async getRepositoryIssues({
     owner,
     repo,
-    state = "open",
+    state = "all",
     labels,
     assignee,
     per_page = 30,
+    page = 1,
   }: IssuesInput): Promise<GitHubIssue[]> {
-    console.log(`[GitHub API] Fetching issues for ${owner}/${repo}`, { state, labels, assignee, per_page });
+    console.log(`[GitHub API] Fetching repo-level issues for ${owner}/${repo}`, { state, labels, assignee, per_page, page });
     
-    const params = new URLSearchParams({
-      state,
-      per_page: per_page.toString(),
-    });
-
-    if (labels) params.append("labels", labels);
-    if (assignee) params.append("assignee", assignee);
-
+    const params = new URLSearchParams();
+    params.set("state", state);
+    params.set("per_page", String(per_page));
+    params.set("page", String(page));
+    if (labels) params.set("labels", labels);
+    if (assignee) params.set("assignee", assignee);
+  
+    const endpoint = `/repos/${owner}/${repo}/issues?${params.toString()}`;
+    console.log(`[GitHub API] Repo issues request URL: ${this.baseUrl}${endpoint}`);
+    console.log(`[GitHub API] Repo issues params:`, Object.fromEntries(params.entries()));
+  
     try {
-      const data = await this.request<any[]>(`/repos/${owner}/${repo}/issues?${params}`);
-      console.log(`[GitHub API] Raw issues response:`, { count: data.length, hasToken: !!this.token });
+      const data = await this.request<any[]>(endpoint);
+      console.log(`[GitHub API] Raw repo issues response:`, { count: data.length, hasToken: !!this.token });
       
-      // Filter out pull requests (GitHub's issues API includes PRs)
-      const issuesOnly = data.filter(item => !item.pull_request);
-      console.log(`[GitHub API] Filtered issues (excluding PRs):`, { count: issuesOnly.length });
-      
-      const parsedIssues = issuesOnly.map(item => {
-        try {
-          return githubIssueSchema.parse(item);
-        } catch (parseError) {
-          console.error(`[GitHub API] Failed to parse issue:`, { item, error: parseError });
-          throw parseError;
+      // Debug: Log the first few items to see what we're getting
+      if (data.length > 0) {
+        console.log(`[GitHub API] First item type check:`, {
+          hasPullRequest: data[0].pull_request,
+          isPR: !!data[0].pull_request,
+          url: data[0].html_url,
+          title: data[0].title,
+          number: data[0].number
+        });
+      }
+  
+      // Filter PRs only AFTER we know we received items
+      const issuesOnly = Array.isArray(data) ? data.filter((item: any) => {
+        const isPR = !!item.pull_request;
+        if (isPR) {
+          console.log(`[GitHub API] Filtering out PR: #${item.number} - ${item.title}`);
         }
+        return !isPR;
+      }) : [];
+      
+      console.log(`[GitHub API] Filtered repo issues (excluding PRs):`, {
+        count: issuesOnly.length,
+        originalCount: data.length,
+        filteredCount: data.length - issuesOnly.length
       });
       
-      console.log(`[GitHub API] Successfully parsed ${parsedIssues.length} issues`);
-      return parsedIssues;
+      // Fallback: If all items are PRs and user asked for issues, try with different parameters
+      if (issuesOnly.length === 0 && data.length > 0) {
+        console.log(`[GitHub API] All items are PRs, trying alternative approach...`);
+        
+        // Try with issue-specific filter
+        const issueParams = new URLSearchParams();
+        issueParams.set("state", state);
+        issueParams.set("per_page", String(per_page));
+        issueParams.set("page", String(page));
+        if (labels) issueParams.set("labels", labels);
+        if (assignee) issueParams.set("assignee", assignee);
+        
+        // Add issue filter to explicitly exclude PRs
+        issueParams.set("filter", "issues");
+        
+        const issueEndpoint = `/repos/${owner}/${repo}/issues?${issueParams.toString()}`;
+        console.log(`[GitHub API] Trying with issue filter: ${this.baseUrl}${issueEndpoint}`);
+        
+        try {
+          const issueData = await this.request<any[]>(issueEndpoint);
+          console.log(`[GitHub API] With issue filter:`, { count: issueData.length });
+          
+          const filteredIssues = Array.isArray(issueData) ? issueData.filter((item: any) => !item.pull_request) : [];
+          console.log(`[GitHub API] Filtered issues with issue filter:`, { count: filteredIssues.length });
+          
+          if (filteredIssues.length > 0) {
+            return filteredIssues.map(item => githubIssueSchema.parse(item));
+          }
+        } catch (fallbackError) {
+          console.log(`[GitHub API] Fallback approach failed:`, fallbackError);
+        }
+      }
+      
+      if (issuesOnly.length === 0 && data.length > 0) {
+        console.log(`[GitHub API] Warning: All ${data.length} items were filtered out as PRs. The repository may have only PRs in the requested state.`);
+      }
+      
+      return issuesOnly.map(item => githubIssueSchema.parse(item));
     } catch (error) {
-      console.error(`[GitHub API] Error fetching issues for ${owner}/${repo}:`, error);
+      if (error instanceof GitHubAPIError && error.status === 403) {
+        throw new GitHubAPIError(`Access denied to ${owner}/${repo} issues. This repository may require "Issues: read" permission for your token. Check your fine-grained PAT permissions.`, 403);
+      }
+      throw error;
+    }
+  }
+  
+  async getOrganizationIssues({
+    org,
+    state = "all",
+    labels,
+    assignee,
+    per_page = 30,
+    page = 1,
+  }: IssuesInput): Promise<GitHubIssue[]> {
+    console.log(`[GitHub API] Fetching org-wide issues for ${org}`, { state, labels, assignee, per_page, page });
+    
+    const queryParts = [`org:${org}`, "is:issue"];
+    if (state !== "all") queryParts.push(`state:${state}`);
+    
+    if (labels) queryParts.push(`label:${labels}`);
+    if (assignee) queryParts.push(`assignee:${assignee}`);
+    
+    const q = queryParts.join(" ");
+    
+    const params = new URLSearchParams({
+      q,
+      per_page: String(per_page),
+      sort: "created",
+      order: "desc",
+    });
+    params.set("page", String(page));
+  
+    const endpoint = `/search/issues?${params.toString()}`;
+    console.log(`[GitHub API] Org issues request URL: ${this.baseUrl}${endpoint}`);
+    console.log(`[GitHub API] Org issues params:`, { q, ...Object.fromEntries(params.entries()) });
+  
+    try {
+      const data = await this.request<{ total_count: number; items: any[] }>(endpoint);
+      console.log(`[GitHub API] Raw org issues search response:`, { total_count: data.total_count, items_count: data.items.length, hasToken: !!this.token });
+  
+      // Defensive filtering - ensure items is an array
+      const issuesOnly = Array.isArray(data.items) ? data.items : [];
+      console.log(`[GitHub API] Org issues (already filtered):`, { count: issuesOnly.length });
+      
+      return issuesOnly.map(item => githubIssueSchema.parse(item));
+    } catch (error) {
+      if (error instanceof GitHubAPIError && error.status === 403) {
+        throw new GitHubAPIError(`Access denied to search issues in ${org} organization. This requires "search" permission in your fine-grained PAT. Check your token permissions.`, 403);
+      }
       throw error;
     }
   }
