@@ -3,6 +3,7 @@
 import { McpConfigModal } from "@/components/tambo/mcp-config-modal";
 import { Tooltip, TooltipProvider } from "@/components/tambo/suggestions-tooltip";
 import { cn } from "@/lib/utils";
+import { useChatInput } from "@/contexts/chat-input-context";
 import {
   useIsTamboTokenUpdating,
   useTamboThread,
@@ -129,6 +130,7 @@ const MessageInput = React.forwardRef<HTMLFormElement, MessageInputProps>(
   ({ children, className, contextKey, variant, ...props }, ref) => {
     const { value, setValue, submit, isPending, error } = useTamboThreadInput();
     const { cancel } = useTamboThread();
+    const { registerSetValue } = useChatInput();
     const [displayValue, setDisplayValue] = React.useState("");
     const [submitError, setSubmitError] = React.useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -140,6 +142,11 @@ const MessageInput = React.forwardRef<HTMLFormElement, MessageInputProps>(
         textareaRef.current.focus();
       }
     }, [value]);
+
+    // Register setValue function with global chat input context
+    React.useEffect(() => {
+      registerSetValue(setValue);
+    }, [setValue, registerSetValue]);
 
     const handleSubmit = React.useCallback(
       async (e: React.FormEvent) => {

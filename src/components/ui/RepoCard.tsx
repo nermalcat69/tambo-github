@@ -1,16 +1,16 @@
 "use client";
 
 import { GitHubRepo } from "@/lib/types";
-import { Star, GitFork, Eye, Calendar, ExternalLink, FileText } from "lucide-react";
+import { useChatInput } from "@/contexts/chat-input-context";
+import { Star, GitFork, Eye, Calendar, ExternalLink, FileText, GitPullRequest, AlertCircle, Sparkles } from "lucide-react";
 
 interface RepoCardProps {
   repo?: GitHubRepo | unknown; // Allow raw objects for delegation
   onSelect?: (repo: GitHubRepo) => void;
   isSelected?: boolean;
-  onSummarize?: (repo: GitHubRepo) => void;
 }
 
-export function RepoCard({ repo, onSelect, isSelected = false, onSummarize }: RepoCardProps) {
+export function RepoCard({ repo, onSelect, isSelected = false }: RepoCardProps) {
   // Handle undefined repo prop
   if (!repo) {
     return (
@@ -58,13 +58,26 @@ export function RepoCard({ repo, onSelect, isSelected = false, onSummarize }: Re
     });
   };
 
+  const { setInputValue } = useChatInput();
+
+  const handleActionClick = (action: 'prs' | 'issues') => {
+    if (action === 'prs') {
+      setInputValue(`Show me the pull requests for ${repoData.owner?.login}/${repoData.name}`);
+    } else if (action === 'issues') {
+      setInputValue(`Show me the issues for ${repoData.owner?.login}/${repoData.name}`);
+    }
+  };
+
+  const handleSummarize = () => {
+    setInputValue(`Summarize the repository ${repoData.owner?.login}/${repoData.name}`);
+  };
+
   return (
     <div 
-      className={`
+      className="
         border rounded-md p-3 cursor-pointer transition-all duration-200
-        hover:border-gray-300 
-        ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}
-      `}
+        hover:border-gray-300 border-gray-200 bg-white
+      "
       onClick={() => onSelect?.(repoData)}
     >
       <div className="flex items-start justify-between mb-1.5">
@@ -77,18 +90,6 @@ export function RepoCard({ repo, onSelect, isSelected = false, onSummarize }: Re
           </p>
         </div>
         <div className="flex items-center gap-1 ml-2">
-          {onSummarize && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onSummarize(repoData);
-              }}
-              className="text-gray-400 hover:text-blue-600 transition-colors"
-              title="Summarize repository"
-            >
-              <FileText className="w-3.5 h-3.5" />
-            </button>
-          )}
           {repoData.html_url && (
             <a
               href={repoData.html_url}
@@ -156,6 +157,54 @@ export function RepoCard({ repo, onSelect, isSelected = false, onSummarize }: Re
           )}
         </div>
       )}
+
+      {/* Action Buttons */}
+      <div className="flex flex-col gap-2 mt-4">
+        <div className="flex gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleActionClick('prs');
+            }}
+            className="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center justify-center gap-1.5"
+          >
+            <GitPullRequest className="w-3.5 h-3.5" />
+            Show PRs
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleActionClick('issues');
+            }}
+            className="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center justify-center gap-1.5"
+          >
+            <AlertCircle className="w-3.5 h-3.5" />
+            Show Issues
+          </button>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSummarize();
+            }}
+            className="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center justify-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Summarize
+          </button>
+          <a
+            href={repoData.html_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center justify-center gap-1.5"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            View
+          </a>
+        </div>
+      </div>
     </div>
   );
 }

@@ -494,13 +494,12 @@ export const components: TamboComponent[] = [
   {
     name: "RepoCard",
     description:
-      "Repository card (name, desc, stars, forks, language, updated). Now handles raw GitHub repo objects directly. Selectable; AI-friendly. Includes summarize button.",
+      "Repository card (name, desc, stars, forks, language, updated). Now handles raw GitHub repo objects directly. Selectable; AI-friendly. Includes summarize, show PRs, and show issues buttons. Can be hidden during summarization.",
     component: RepoCard,
     propsSchema: z.object({
       repo: z.union([githubRepoSchema, z.unknown()]).optional(),
       onSelect: z.function().optional(),
       isSelected: z.boolean().optional(),
-      onSummarize: z.function().optional(),
     }),
   },
   {
@@ -543,7 +542,6 @@ export const components: TamboComponent[] = [
       }).optional(),
       onSelect: z.function().optional(),
       isSelected: z.boolean().optional(),
-      onSummarize: z.function().optional(),
     }),
   },
   {
@@ -560,7 +558,6 @@ export const components: TamboComponent[] = [
       }).optional(),
       onSelect: z.function().optional(),
       isSelected: z.boolean().optional(),
-      onSummarize: z.function().optional(),
     }),
   },
   {

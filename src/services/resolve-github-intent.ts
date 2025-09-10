@@ -8,7 +8,8 @@ export type ResolvedIntent =
   | { kind: "list_user_repos"; params: { username: string; per_page?: number } }
   | { kind: "list_issues"; params: { owner: string; repo: string; state?: "open" | "closed" | "all"; per_page?: number } }
   | { kind: "list_prs"; params: { owner: string; repo: string; state?: "open" | "closed" | "all"; per_page?: number } }
-  | { kind: "list_commits"; params: { owner: string; repo: string; sha?: string; per_page?: number } };
+  | { kind: "list_commits"; params: { owner: string; repo: string; sha?: string; per_page?: number } }
+  | { kind: "summarize_repo"; params: { owner: string; repo: string } };
 
 export const resolveGitHubIntentInputSchema = z.object({
   input: z.string().min(1).describe("Natural language request, e.g. 'grab me 10 repos from tambo-ai org'"),
@@ -53,6 +54,12 @@ function extractFullName(text: string): { owner: string; repo: string } | undefi
   if (slash) return { owner: slash[1], repo: slash[2] };
   const repoWord = text.match(/\brepo\s+([a-z0-9-_]+)\/([a-z0-9-_.]+)\b/i);
   if (repoWord) return { owner: repoWord[1], repo: repoWord[2] };
+  
+  // Handle special case for "tamb repo" -> "tambo-ai/tambo"
+  if (/\btamb\s+repo\b/i.test(text)) {
+    return { owner: "tambo-ai", repo: "tambo" };
+  }
+  
   return undefined;
 }
 
@@ -97,7 +104,16 @@ export function resolveGitHubIntent(input: z.infer<typeof resolveGitHubIntentInp
   const { input: textRaw, fallback_per_page } = resolveGitHubIntentInputSchema.parse(input);
   const text = textRaw.trim();
 
-  // 1) Direct repo reference?
+  // 1) Check for summarization requests first
+  const isSummarization = /\b(summarize|summary|analyze|overview|describe)\b/i.test(text);
+  if (isSummarization) {
+    const full = extractFullName(text);
+    if (full) {
+      return { kind: "summarize_repo", params: full };
+    }
+  }
+
+  // 2) Direct repo reference?
   const full = extractFullName(text);
   if (full) {
     // If they asked about issues/PRs/commits explicitly, route accordingly

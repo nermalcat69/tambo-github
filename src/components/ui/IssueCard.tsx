@@ -1,6 +1,7 @@
 "use client";
 
 import { GitHubIssue } from "@/lib/types";
+import { useChatInput } from "@/contexts/chat-input-context";
 import { AlertCircle, MessageCircle, Calendar, User, CheckCircle, XCircle, Bug, FileText, Lightbulb, Brain, Clock, Sparkles } from "lucide-react";
 
 interface IssueClassification {
@@ -14,10 +15,10 @@ interface IssueCardProps {
   classification?: IssueClassification;
   onSelect?: (issue: GitHubIssue) => void;
   isSelected?: boolean;
-  onSummarize?: (issue: GitHubIssue) => void;
 }
 
-export function IssueCard({ issue, classification, onSelect, isSelected = false, onSummarize }: IssueCardProps) {
+export function IssueCard({ issue, classification, onSelect, isSelected = false }: IssueCardProps) {
+  const { setInputValue } = useChatInput();
   // Handle undefined issue prop
   if (!issue) {
     return (
@@ -103,11 +104,10 @@ export function IssueCard({ issue, classification, onSelect, isSelected = false,
 
   return (
     <div 
-      className={`
+      className="
         border rounded-md p-3 cursor-pointer transition-all duration-200
-        hover:border-gray-300 
-        ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}
-      `}
+        hover:border-gray-300 border-gray-200 bg-white
+      "
       onClick={handleClick}
     >
       <div className="flex items-start gap-2">
@@ -153,26 +153,24 @@ export function IssueCard({ issue, classification, onSelect, isSelected = false,
                   <span>{issueData.assignees.length} assigned</span>
                 </div>
               )}
-              {onSummarize && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSummarize(issueData);
-                  }}
-                  className="flex items-center gap-1 text-purple-600 hover:text-purple-800 transition-colors"
-                  title="Summarize issue"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  <span>summarize</span>
-                </button>
-              )}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setInputValue(`Summarize issue #${issueData.number}: ${issueData.title}`);
+                }}
+                className="flex items-center gap-1 text-purple-600 hover:text-purple-800 transition-colors"
+                title="Summarize issue"
+              >
+                <Sparkles className="w-3 h-3" />
+                <span>summarize</span>
+              </button>
             </div>
             
             {issueData.labels && issueData.labels.length > 0 && (
               <div className="flex gap-1">
-                {issueData.labels.slice(0, 2).map((label: Record<string, any>) => (
+                {issueData.labels.slice(0, 2).map((label: Record<string, any>, index: number) => (
                   <span
-                    key={label.name}
+                    key={label.id || `${label.name}-${index}`}
                     className="px-2 py-1 text-xs bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-full"
                   >
                     {label.name}

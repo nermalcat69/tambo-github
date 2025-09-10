@@ -5,6 +5,7 @@ import { TamboProvider } from "@tambo-ai/react";
 import { TamboMcpProvider } from "@tambo-ai/react/mcp";
 import { MessageThreadFull } from "@/components/tambo/message-thread-full";
 import { useMcpServers } from "@/components/tambo/mcp-config-modal";
+import { ChatInputProvider } from "@/contexts/chat-input-context";
 import { components, tools } from "@/lib/tambo";
 
 export default function Home() {
@@ -19,6 +20,7 @@ export default function Home() {
       tamboUrl={process.env.NEXT_PUBLIC_TAMBO_URL}
     >
       <TamboMcpProvider mcpServers={mcpServers}>
+        <ChatInputProvider>
         <main className="bg-[#F3F8F5] h-screen flex flex-col">
           <div className="flex-1 flex flex-col pt-5 min-h-0">
             <div className="flex-1 flex flex-col w-4/5 mx-auto min-h-0">
@@ -40,6 +42,7 @@ export default function Home() {
             </div>
           </div>
         </main>
+        </ChatInputProvider>
       </TamboMcpProvider>
     </TamboProvider>
   );
