@@ -1,6 +1,12 @@
-# GitHub Explorer
+# GitHub Explorer x Tambo
+
+<img width="1384" height="598" alt="image" src="https://github.com/user-attachments/assets/f11e5a44-9fc0-4fa5-9dd8-f1d8d13d4a99" />
+
 
 A natural language interface for GitHub repository management powered by [Tambo AI](https://tambo.co) and enhanced with [Exa](https://exa.ai) search. Analyze repositories, manage issues, track pull requests, and perform GitHub operations through conversational AI with advanced web search capabilities.
+
+## Demo
+
 
 ## Setup
 
@@ -45,6 +51,12 @@ EXASEARCH_API_KEY=your_exa_api_key
 ### API Keys Setup
 
 #### Tambo API Key
+
+
+
+https://github.com/user-attachments/assets/ce0580cb-2049-4653-ac93-0ce406049818
+
+
 1. Sign up on [Tambo](https://tambo.co)
 2. Create a Project and then Generate an API Key
 3. For support, join their [Discord community](https://discord.gg/hpT8n7XdyN)
