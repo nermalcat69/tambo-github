@@ -45,6 +45,12 @@ EXASEARCH_API_KEY=your_exa_api_key
 ### API Keys Setup
 
 #### Tambo API Key
+
+
+
+https://github.com/user-attachments/assets/ce0580cb-2049-4653-ac93-0ce406049818
+
+
 1. Sign up on [Tambo](https://tambo.co)
 2. Create a Project and then Generate an API Key
 3. For support, join their [Discord community](https://discord.gg/hpT8n7XdyN)
