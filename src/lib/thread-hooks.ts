@@ -119,9 +119,17 @@ export function getSafeContent(
       .map((item) => (item && item.type === "text" ? (item.text ?? "") : ""))
       .join("");
   }
-  // Handle potential edge cases or unknown types
-  // console.warn("getSafeContent encountered unknown content type:", content);
-  return "Invalid content format"; // Or handle differently
+  // Handle potential edge cases or unknown types - ensure we never return objects
+  if (typeof content === "object" && content !== null) {
+    console.warn("getSafeContent encountered object content:", content);
+    try {
+      return JSON.stringify(content);
+    } catch {
+      return "[Invalid object content]";
+    }
+  }
+  // Handle other primitive types
+  return String(content);
 }
 
 /**

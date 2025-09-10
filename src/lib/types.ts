@@ -61,7 +61,7 @@ export const githubPRSchema = z.object({
   title: z.string(),
   body: z.string().nullable(),
   state: z.enum(["open", "closed"]),
-  merged: z.boolean(),
+  merged: z.boolean().optional(),
   user: githubUserSchema,
   assignees: z.array(githubUserSchema),
   requested_reviewers: z.array(githubUserSchema),
@@ -86,12 +86,12 @@ export const githubPRSchema = z.object({
     ref: z.string(),
     sha: z.string(),
   }),
-  changed_files: z.number(),
-  additions: z.number(),
-  deletions: z.number(),
-  comments: z.number(),
-  review_comments: z.number(),
-  commits: z.number(),
+  changed_files: z.number().optional(),
+  additions: z.number().optional(),
+  deletions: z.number().optional(),
+  comments: z.number().optional(),
+  review_comments: z.number().optional(),
+  commits: z.number().optional(),
 });
 
 // GitHub Commit Schema

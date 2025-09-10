@@ -553,7 +553,7 @@ const ThreadHistoryList = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "overflow-y-auto flex-1 transition-all duration-300 ease-in-out",
+        "overflow-y-auto min-h-0  flex-1 transition-all duration-300 ease-in-out",
         isCollapsed
           ? "opacity-0 max-h-0 overflow-hidden pointer-events-none"
           : "opacity-100 max-h-full pointer-events-auto",

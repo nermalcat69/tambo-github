@@ -229,7 +229,9 @@ const MessageContent = React.forwardRef<HTMLDivElement, MessageContentProps>(
                 {typeof safeContent === "string" ? safeContent : ""}
               </ReactMarkdown>
             ) : (
-              safeContent
+              typeof safeContent === "string" || React.isValidElement(safeContent) 
+                ? safeContent 
+                : String(safeContent)
             )}
             {message.isCancelled && (
               <span className="text-muted-foreground text-xs">cancelled</span>
@@ -406,7 +408,7 @@ function formatToolResult(
   try {
     const parsed = JSON.parse(safeContent);
     return (
-      <pre className="bg-muted/50 rounded-md p-3 text-xs overflow-x-auto overflow-y-auto max-w-full max-h-64">
+      <pre className="bg-muted/50 rounded-md p-3 text-xs overflow-x-auto overflow-y-auto max-w-full min-h-0 ">
         <code className="font-mono break-words whitespace-pre-wrap">
           {JSON.stringify(parsed, null, 2)}
         </code>

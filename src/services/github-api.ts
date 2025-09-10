@@ -84,6 +84,8 @@ class GitHubAPI {
     assignee,
     per_page = 30,
   }: IssuesInput): Promise<GitHubIssue[]> {
+    console.log(`[GitHub API] Fetching issues for ${owner}/${repo}`, { state, labels, assignee, per_page });
+    
     const params = new URLSearchParams({
       state,
       per_page: per_page.toString(),
@@ -92,8 +94,29 @@ class GitHubAPI {
     if (labels) params.append("labels", labels);
     if (assignee) params.append("assignee", assignee);
 
-    const data = await this.request<any[]>(`/repos/${owner}/${repo}/issues?${params}`);
-    return data.map(item => githubIssueSchema.parse(item));
+    try {
+      const data = await this.request<any[]>(`/repos/${owner}/${repo}/issues?${params}`);
+      console.log(`[GitHub API] Raw issues response:`, { count: data.length, hasToken: !!this.token });
+      
+      // Filter out pull requests (GitHub's issues API includes PRs)
+      const issuesOnly = data.filter(item => !item.pull_request);
+      console.log(`[GitHub API] Filtered issues (excluding PRs):`, { count: issuesOnly.length });
+      
+      const parsedIssues = issuesOnly.map(item => {
+        try {
+          return githubIssueSchema.parse(item);
+        } catch (parseError) {
+          console.error(`[GitHub API] Failed to parse issue:`, { item, error: parseError });
+          throw parseError;
+        }
+      });
+      
+      console.log(`[GitHub API] Successfully parsed ${parsedIssues.length} issues`);
+      return parsedIssues;
+    } catch (error) {
+      console.error(`[GitHub API] Error fetching issues for ${owner}/${repo}:`, error);
+      throw error;
+    }
   }
 
   async getRepositoryPRs({
@@ -219,6 +242,39 @@ class GitHubAPI {
       },
       body: JSON.stringify({ labels }),
     });
+  }
+
+  // Methods for summarization data
+  async getRepositoryReadme({ owner, repo }: RepoInput): Promise<{ content: string; encoding: string } | null> {
+    try {
+      const response = await this.request<any>(`/repos/${owner}/${repo}/readme`);
+      return {
+        content: response.content,
+        encoding: response.encoding
+      };
+    } catch (error) {
+      if (error instanceof GitHubAPIError && error.status === 404) {
+        return null; // No README found
+      }
+      throw error;
+    }
+  }
+
+  async getPullRequestDiff({ owner, repo }: RepoInput, prNumber: number): Promise<string> {
+    const response = await this.request<string>(`/repos/${owner}/${repo}/pulls/${prNumber}`, {
+      headers: {
+        Accept: "application/vnd.github.v3.diff"
+      }
+    });
+    return response;
+  }
+
+  async getIssueComments({ owner, repo }: RepoInput, issueNumber: number): Promise<any[]> {
+    return this.request<any[]>(`/repos/${owner}/${repo}/issues/${issueNumber}/comments`);
+  }
+
+  async getPullRequestComments({ owner, repo }: RepoInput, prNumber: number): Promise<any[]> {
+    return this.request<any[]>(`/repos/${owner}/${repo}/pulls/${prNumber}/comments`);
   }
 }
 

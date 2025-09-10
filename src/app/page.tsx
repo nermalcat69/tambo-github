@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import Image from "next/image";
 import { TamboProvider } from "@tambo-ai/react";
 import { TamboMcpProvider } from "@tambo-ai/react/mcp";
 import { MessageThreadFull } from "@/components/tambo/message-thread-full";
@@ -19,18 +19,19 @@ export default function Home() {
       tamboUrl={process.env.NEXT_PUBLIC_TAMBO_URL}
     >
       <TamboMcpProvider mcpServers={mcpServers}>
-        <main className="h-screen bg-gray-50">
-          <div className="flex-1 p-6 h-full">
-            <div className="h-full max-w-6xl mx-auto">
-              <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+        <main className="bg-[#F3F8F5] h-screen flex flex-col">
+          <div className="flex-1 flex flex-col pt-5 min-h-0">
+            <div className="flex-1 flex flex-col w-4/5 mx-auto min-h-0">
+              <a href="https://tambo.co" target="_blank" className="mx-auto pb-10" ><Image src="./Tambo-Lockup.svg" width={200} height={200} alt="tambo logo" /></a>
+              <div className=" flex-shrink-0 p-4 bg-[#A1FCD1]/60 border rounded-t-xl border-b">
+                <h1 className="text-2xl font-semibold text-neutral-900 mb-2">
                   GitHub Explorer
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-neutral-700">
                   Analyze repositories, manage issues, and track pull requests with AI assistance.
                 </p>
               </div>
-              <div className="h-[calc(100vh-200px)]">
+              <div className="flex-1 w-full border-r border-l min-h-0">
                 <MessageThreadFull
                   className="h-full w-full"
                   contextKey="github-explorer"

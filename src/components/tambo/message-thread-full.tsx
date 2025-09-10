@@ -56,38 +56,51 @@ export const MessageThreadFull = React.forwardRef<
 
   const threadHistorySidebar = <></>;
 
-  const defaultSuggestions: Suggestion[] = [
-    {
-      id: "suggestion-1",
-      title: "Play",
-      detailedSuggestion: "Play the current song or resume playback",
-      messageId: "play-music",
-    },
-    {
-      id: "suggestion-2",
-      title: "Add 3 80s songs",
-      detailedSuggestion: "Add 3 classic songs from the 1980s to my playlist",
-      messageId: "add-80s-songs",
-    },
-    {
-      id: "suggestion-3",
-      title: "Reverse the order",
-      detailedSuggestion: "Reverse the order of songs in my current playlist",
-      messageId: "reverse-order",
-    },
-    {
-      id: "suggestion-4",
-      title: "Shuffle playlist",
-      detailedSuggestion: "Shuffle the songs in my playlist to play in random order",
-      messageId: "shuffle-playlist",
-    },
-    {
-      id: "suggestion-5",
-      title: "Create jazz playlist",
-      detailedSuggestion: "Create a new playlist with smooth jazz and classic jazz songs",
-      messageId: "create-jazz-playlist",
-    },
-  ];
+const defaultSuggestions: Suggestion[] = [
+  {
+    id: "suggestion-1",
+    title: "List 5 repos from tambo-ai",
+    detailedSuggestion: "Fetch the top 5 repositories from the tambo-ai org",
+    messageId: "list-tambo-repos",
+  },
+  {
+    id: "suggestion-2",
+    title: "Unassigned issues",
+    detailedSuggestion: "List all open issues without an assignee across tambo-ai repos",
+    messageId: "list-unassigned-issues",
+  },
+  {
+    id: "suggestion-3",
+    title: "Recent PRs",
+    detailedSuggestion: "Show me the 5 most recent pull requests in tambo-ai/tambo",
+    messageId: "recent-prs",
+  },
+  {
+    id: "suggestion-4",
+    title: "Commits to cloud repo",
+    detailedSuggestion: "Get the latest 10 commits from tambo-ai/tambo-cloud main branch",
+    messageId: "recent-cloud-commits",
+  },
+  {
+    id: "suggestion-5",
+    title: "Star counts",
+    detailedSuggestion: "Show star and fork counts for 5 repositories in tambo-ai",
+    messageId: "repo-stats",
+  },
+  {
+    id: "suggestion-6",
+    title: "Open vs closed issues",
+    detailedSuggestion: "Compare open and closed issue counts in tambo-ai/tambo",
+    messageId: "issue-stats",
+  },
+  {
+    id: "suggestion-7",
+    title: "Generate release notes",
+    detailedSuggestion: "Create AI-generated release notes for tambo-ai/tambo since the last tag",
+    messageId: "generate-release-notes",
+  },
+];
+
 
   return (
     <>
@@ -95,33 +108,39 @@ export const MessageThreadFull = React.forwardRef<
       {historyPosition === "left" && threadHistorySidebar}
 
       <ThreadContainer ref={mergedRef} className={className} {...props}>
-        <ScrollableMessageContainer className="p-4">
-          <ThreadContent variant={variant}>
-            <ThreadContentMessages />
-          </ThreadContent>
-        </ScrollableMessageContainer>
+        <div className="flex-1 flex flex-col min-h-0 max-h-full overflow-hidden">
+          <ScrollableMessageContainer className="flex-1 p-4 min-h-0">
+            <ThreadContent variant={variant}>
+              <ThreadContentMessages />
+            </ThreadContent>
+          </ScrollableMessageContainer>
 
-        {/* Message suggestions status */}
-        <MessageSuggestions>
-          <MessageSuggestionsStatus />
-        </MessageSuggestions>
+          {/* Message suggestions status */}
+          <div className="flex-shrink-0">
+            <MessageSuggestions>
+              <MessageSuggestionsStatus />
+            </MessageSuggestions>
+          </div>
 
-        {/* Message input */}
-        <div className="p-4">
-          <MessageInput contextKey={contextKey}>
-            <MessageInputTextarea />
-            <MessageInputToolbar>
-              <MessageInputMcpConfigButton />
-              <MessageInputSubmitButton />
-            </MessageInputToolbar>
-            <MessageInputError />
-          </MessageInput>
+          {/* Message input */}
+          <div className="flex-shrink-0 p-4">
+            <MessageInput contextKey={contextKey}>
+              <MessageInputTextarea />
+              <MessageInputToolbar>
+                <MessageInputMcpConfigButton />
+                <MessageInputSubmitButton />
+              </MessageInputToolbar>
+              <MessageInputError />
+            </MessageInput>
+          </div>
+
+          {/* Message suggestions */}
+          <div className="flex-shrink-0">
+            <MessageSuggestions initialSuggestions={defaultSuggestions} maxSuggestions={5}>
+              <MessageSuggestionsList />
+            </MessageSuggestions>
+          </div>
         </div>
-
-        {/* Message suggestions */}
-        <MessageSuggestions initialSuggestions={defaultSuggestions} maxSuggestions={5}>
-          <MessageSuggestionsList />
-        </MessageSuggestions>
       </ThreadContainer>
 
       {/* Thread History Sidebar - rendered last if history is on the right */}

@@ -54,9 +54,13 @@ export const getRepositoryBranches = async (input: z.infer<typeof repoInputSchem
 
 // Issues Tools
 export const getRepositoryIssues = async (input: z.infer<typeof issuesInputSchema>) => {
+  console.log('[GitHub Tools] getRepositoryIssues called with:', input);
   try {
-    return await githubAPI.getRepositoryIssues(input);
+    const issues = await githubAPI.getRepositoryIssues(input);
+    console.log(`[GitHub Tools] Successfully fetched ${issues.length} issues`);
+    return issues;
   } catch (error) {
+    console.error('[GitHub Tools] Failed to fetch issues:', error);
     throw new Error(`Failed to fetch issues: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };

@@ -37,20 +37,18 @@ export const ThreadContainer = React.forwardRef<
       className={cn(
         // Base layout and styling
         "flex flex-col bg-white overflow-hidden bg-background",
-        "h-screen",
+        "h-full min-h-0 max-h-full",
 
         // Add smooth transitions for layout changes
         "transition-all duration-200 ease-in-out",
 
-        // Sidebar spacing based on history position
-        historyPosition === "right"
+        // Sidebar spacing based on history position (only when canvas space exists)
+        hasCanvasSpace && historyPosition === "right"
           ? "mr-[var(--sidebar-width,16rem)]"
-          : "ml-[var(--sidebar-width,16rem)]",
+          : hasCanvasSpace && "ml-[var(--sidebar-width,16rem)]",
 
         // Width constraints based on canvas presence
-        hasCanvasSpace
-          ? "max-w-3xl"
-          : "w-[calc(100%-var(--sidebar-width,16rem))]",
+        hasCanvasSpace && "max-w-3xl",
 
         // Border styling when canvas is present
         hasCanvasSpace && (canvasIsOnLeft ? "border-l" : "border-r"),

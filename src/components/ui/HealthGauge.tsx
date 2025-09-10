@@ -60,7 +60,7 @@ export function HealthGauge({
   return (
     <div className={`
       border rounded-lg ${colorClasses[color]} ${sizeClasses[size]}
-      transition-all duration-200 hover:shadow-sm
+      transition-all duration-200 
     `}>
       <div className="text-center">
         <h3 className={`font-medium ${textSizes[size].title} mb-2`}>

@@ -41,10 +41,10 @@ pnpm install
 Copy the example environment file:
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
-Edit `.env.local` and add your API keys:
+Edit `.env` and add your API keys:
 
 ```env
 NEXT_PUBLIC_TAMBO_API_KEY=your_tambo_api_key_here
