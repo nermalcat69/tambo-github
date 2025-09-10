@@ -1,6 +1,12 @@
-# GitHub Explorer
+# GitHub Explorer x Tambo
+
+<img width="1384" height="598" alt="image" src="https://github.com/user-attachments/assets/f11e5a44-9fc0-4fa5-9dd8-f1d8d13d4a99" />
+
 
 A natural language interface for GitHub repository management powered by [Tambo AI](https://tambo.co) and enhanced with [Exa](https://exa.ai) search. Analyze repositories, manage issues, track pull requests, and perform GitHub operations through conversational AI with advanced web search capabilities.
+
+## Demo
+
 
 ## Setup
 
