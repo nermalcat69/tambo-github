@@ -2,6 +2,7 @@
 
 import { GitHubPR } from "@/lib/types";
 import { useChatInput } from "@/contexts/chat-input-context";
+import { githubAPI } from "@/services/github-api";
 import { GitPullRequest, MessageCircle, Calendar, User, CheckCircle, XCircle, Clock, Brain, AlertTriangle, TrendingUp, ExternalLink, FileText, Sparkles } from "lucide-react";
 
 interface PRAnalysis {
@@ -161,10 +162,47 @@ export function PRCard({ pr, analysis, onSelect, isSelected = false }: PRCardPro
                 <span>{(pr as GitHubPR).changed_files || 0} files</span>
               </div>
               <button
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
                   const prData = pr as GitHubPR;
-                  setInputValue(`Summarize pull request #${prData.number}: ${prData.title}`);
+                  try {
+                    // Extract owner and repo from PR (using any cast as schema lacks base.repo)
+                    const anyPr = pr as any;
+                    const owner = anyPr.base?.repo?.owner?.login;
+                    const repo = anyPr.base?.repo?.name;
+                    
+                    if (!owner || !repo) {
+                      throw new Error('Could not determine repository owner or name from PR');
+                    }
+
+                    // Fetch README
+                    const readmeData = await githubAPI.getRepositoryReadme({ owner, repo });
+                    
+                    let readmeContent = '';
+                    if (readmeData) {
+                      // Decode base64 (strip whitespace for clean decode)
+                      const cleanContent = readmeData.content.replace(/\s/g, '');
+                      readmeContent = atob(cleanContent);
+                    }
+
+                    // Truncate README to avoid token limits
+                    const truncatedReadme = readmeContent.substring(0, 1000) + (readmeContent.length > 1000 ? '...' : '');
+
+                    // Construct enhanced prompt
+                    const enhancedPrompt = `Summarize the pull request #${prData.number} in the repository ${owner}/${repo} in 100 words.
+
+Title: ${prData.title}
+
+Body: ${prData.body || 'No description provided'}
+
+Using the following README context: ${truncatedReadme}`;
+                    
+                    setInputValue(enhancedPrompt);
+                  } catch (error) {
+                    console.error('Error fetching README for PR summarization:', error);
+                    // Fallback to basic prompt
+                    setInputValue(`Summarize pull request #${prData.number}: ${prData.title}`);
+                  }
                 }}
                 className="flex items-center gap-1 text-purple-600 hover:text-purple-800 transition-colors"
                 title="Summarize PR"

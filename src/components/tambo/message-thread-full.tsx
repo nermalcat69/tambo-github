@@ -66,7 +66,7 @@ const defaultSuggestions: Suggestion[] = [
   {
     id: "suggestion-2",
     title: "Unassigned issues",
-    detailedSuggestion: "List all open issues without an assignee across tambo-ai repos",
+    detailedSuggestion: "List 6 open issues without an assignee across tambo-ai repos",
     messageId: "list-unassigned-issues",
   },
   {

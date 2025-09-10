@@ -164,7 +164,7 @@ const ThreadContentMessages = React.forwardRef<
                   className={
                     message.role === "assistant"
                       ? "text-primary font-sans"
-                      : "text-primary bg-container hover:bg-backdrop font-sans"
+                      : "text-primary bg-container hover:bg-neutral-200/70 font-sans"
                   }
                 />
                 <ToolcallInfo />

@@ -33,6 +33,9 @@ import {
   generateReleaseNotes,
 } from "@/services/github-tools";
 import { resolveGitHubIntent } from "@/services/resolve-github-intent";
+import {
+  listOrganizationIssues,
+} from "@/services/github-tools";
 
 
 /* -------------------------------------------------------------------------- */
@@ -125,6 +128,12 @@ export const tools: TamboTool[] = [
             per_page: intent.params.per_page ?? 30
           };
           return await getRepositoryPRs(prParams);
+        case "list_org_issues":
+          const orgIssueParams = {
+            ...intent.params,
+            per_page: intent.params.per_page ?? 30
+          };
+          return await listOrganizationIssues(orgIssueParams);
         case "list_commits":
           const commitParams = {
             ...intent.params,
@@ -353,6 +362,18 @@ export const tools: TamboTool[] = [
       full_name: z.string().optional(),
       from_tag: z.string().optional(),
       to_tag: z.string().optional(),
+    })),
+  },
+  {
+    name: "listOrganizationIssues",
+    description:
+      "List issues across all repositories in an organization. Supports filters for state, assignee (use 'none' for unassigned), and per_page. Aggregates from all repos, sorts by recency, limits results.",
+    tool: listOrganizationIssues,
+    toolSchema: createTamboSchema(z.object({
+      org: z.string().min(1).describe("Organization name"),
+      state: StateSchema.describe("Issue state (open, closed, all)"),
+      assignee: z.string().optional().describe("'none' for unassigned issues"),
+      per_page: PerPageSchema.optional().describe("Number of issues to return (default 30)"),
     })),
   },
   {
