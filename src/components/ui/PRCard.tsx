@@ -214,9 +214,9 @@ Using the following README context: ${truncatedReadme}`;
             
             {(pr as GitHubPR).labels && (pr as GitHubPR).labels.length > 0 && (
               <div className="flex gap-1">
-                {(pr as GitHubPR).labels.slice(0, 2).map((label: Record<string, any>) => (
+                {(pr as GitHubPR).labels.slice(0, 2).map((label: Record<string, any>, index: number) => (
                   <span
-                    key={label.name}
+                    key={`${label.name}-${index}`}
                     className="px-2 py-1 text-xs bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-full"
                   >
                     {label.name}

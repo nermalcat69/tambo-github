@@ -138,7 +138,7 @@ const ThreadContentMessages = React.forwardRef<
           <div
             key={
               message.id ??
-              `${message.role}-${
+              `${message.role}-${index}-${
                 message.createdAt ?? Date.now()
               }-${message.content?.toString().substring(0, 10)}`
             }
