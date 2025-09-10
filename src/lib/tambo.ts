@@ -323,7 +323,7 @@ export const components: TamboComponent[] = [
   {
     name: "RepoCard",
     description:
-      "Repository card (name, desc, stars, forks, language, updated). Now handles raw GitHub repo objects directly. Selectable; AI-friendly. Includes summarize, show PRs, and show issues buttons. Can be hidden during summarization.",
+      "Repository card (name, desc, stars, forks, language, updated). Now handles raw GitHub repo objects directly. Selectable; AI-friendly. Includes show PRs, and show issues buttons. Can be hidden during summarization.",
     component: RepoCard,
     propsSchema: z.object({
       repo: z.union([githubRepoSchema, z.unknown()]).optional(),
@@ -359,7 +359,7 @@ export const components: TamboComponent[] = [
   {
     name: "PRCard",
     description:
-      "PR card (title, author, status, labels, review state, merge info). Now handles raw GitHub PR objects directly. Includes AI summaries and summarize button.",
+      "PR card (title, author, status, labels, review state, merge info). Now handles raw GitHub PR objects directly.",
     component: PRCard,
     propsSchema: z.object({
       pr: z.union([githubPRSchema, z.unknown()]).optional(),
@@ -376,7 +376,7 @@ export const components: TamboComponent[] = [
   {
     name: "IssueCard",
     description:
-      "Issue card (title, body, labels, assignees, state). Now handles raw GitHub issue objects directly. Auto type detection + selection. Includes summarize button.",
+      "Issue card (title, body, labels, assignees, state). Now handles raw GitHub issue objects directly. Auto type detection + selection.",
     component: IssueCard,
     propsSchema: z.object({
       issue: z.union([githubIssueSchema, z.unknown()]).optional(),

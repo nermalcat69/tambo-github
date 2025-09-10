@@ -180,16 +180,6 @@ export function RepoCard({ repo, onSelect, isSelected = false }: RepoCardProps) 
           </button>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSummarize();
-            }}
-            className="cursor-pointer flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center justify-center gap-1.5"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            Summarize
-          </button>
           <a
             href={repoData.html_url}
             target="_blank"
