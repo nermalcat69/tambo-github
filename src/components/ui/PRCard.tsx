@@ -2,7 +2,7 @@
 
 import { GitHubPR } from "../../lib/types";
 import { useChatInput } from "../../contexts/chat-input-context";
-import { GitPullRequest, MessageCircle, Calendar, User, CheckCircle, XCircle, Clock, FileText } from "lucide-react";
+import { GitPullRequest, Calendar, User, CheckCircle, XCircle, Clock } from "lucide-react";
 
 interface PRCardProps {
   pr?: GitHubPR | unknown; // Allow raw objects for delegation

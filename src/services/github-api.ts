@@ -2,17 +2,11 @@ import {
   GitHubRepo,
   GitHubIssue,
   GitHubPR,
-  GitHubCommit,
-  GitHubBranch,
-  RepoInput,
   IssuesInput,
   PRsInput,
-  CommitsInput,
   githubRepoSchema,
   githubIssueSchema,
   githubPRSchema,
-  githubCommitSchema,
-  githubBranchSchema,
 } from "../lib/types";
 
 class GitHubAPIError extends Error {
@@ -84,11 +78,6 @@ class GitHubAPI {
       }
       throw new GitHubAPIError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-  }
-
-  async getRepository({ owner, repo }: RepoInput): Promise<GitHubRepo> {
-    const data = await this.request<unknown>(`/repos/${owner}/${repo}`);
-    return githubRepoSchema.parse(data);
   }
 
   async getRepositoryIssues({
@@ -265,46 +254,6 @@ class GitHubAPI {
     return data.map(item => githubPRSchema.parse(item));
   }
 
-  async getRepositoryCommits({
-    owner,
-    repo,
-    sha,
-    per_page = 30,
-  }: CommitsInput): Promise<GitHubCommit[]> {
-    const params = new URLSearchParams({
-      per_page: per_page.toString(),
-    });
-
-    if (sha) params.append("sha", sha);
-
-    const data = await this.request<unknown[]>(`/repos/${owner}/${repo}/commits?${params}`);
-    return data.map(item => githubCommitSchema.parse(item));
-  }
-
-  async getRepositoryBranches({ owner, repo }: RepoInput): Promise<GitHubBranch[]> {
-    const data = await this.request<unknown[]>(`/repos/${owner}/${repo}/branches`);
-    return data.map(branch => githubBranchSchema.parse(branch));
-  }
-
-  async getPullRequest({ owner, repo }: RepoInput, prNumber: number): Promise<GitHubPR> {
-    const data = await this.request<unknown>(`/repos/${owner}/${repo}/pulls/${prNumber}`);
-    return githubPRSchema.parse(data);
-  }
-
-  async getIssue({ owner, repo }: RepoInput, issueNumber: number): Promise<GitHubIssue> {
-    const data = await this.request<unknown>(`/repos/${owner}/${repo}/issues/${issueNumber}`);
-    return githubIssueSchema.parse(data);
-  }
-
-  async searchRepositories(query: string, per_page = 30): Promise<GitHubRepo[]> {
-    const params = new URLSearchParams({
-      q: query,
-      per_page: per_page.toString(),
-    });
-    const data = await this.request<{ items: unknown[] }>(`/search/repositories?${params}`);
-    return data.items.map(item => githubRepoSchema.parse(item));
-  }
-
   async getOrganizationRepositories(org: string, per_page = 30): Promise<GitHubRepo[]> {
     const params = new URLSearchParams({
       per_page: per_page.toString(),
@@ -313,95 +262,6 @@ class GitHubAPI {
     });
     const data = await this.request<unknown[]>(`/orgs/${org}/repos?${params}`);
     return data.map(item => githubRepoSchema.parse(item));
-  }
-
-  async getUserRepositories(username: string, per_page = 30): Promise<GitHubRepo[]> {
-    const params = new URLSearchParams({
-      per_page: per_page.toString(),
-      sort: 'updated',
-      direction: 'desc'
-    });
-    const data = await this.request<unknown[]>(`/users/${username}/repos?${params}`);
-    return data.map(item => githubRepoSchema.parse(item));
-  }
-
-  async getRateLimit() {
-    return this.request<unknown>("/rate_limit");
-  }
-
-  // Action methods (require write permissions)
-  async starRepository({ owner, repo }: RepoInput): Promise<void> {
-    await this.request(`/user/starred/${owner}/${repo}`, {
-      method: "PUT",
-    });
-  }
-
-  async unstarRepository({ owner, repo }: RepoInput): Promise<void> {
-    await this.request(`/user/starred/${owner}/${repo}`, {
-      method: "DELETE",
-    });
-  }
-
-  async createIssueComment(
-    { owner, repo }: RepoInput,
-    issueNumber: number,
-    body: string
-  ): Promise<void> {
-    await this.request(`/repos/${owner}/${repo}/issues/${issueNumber}/comments`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ body }),
-    });
-  }
-
-  async addIssueLabels(
-    { owner, repo }: RepoInput,
-    issueNumber: number,
-    labels: string[]
-  ): Promise<void> {
-    await this.request(`/repos/${owner}/${repo}/issues/${issueNumber}/labels`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ labels }),
-    });
-  }
-
-  // Methods for summarization data
-  async getRepositoryReadme({ owner, repo }: RepoInput): Promise<{ content: string; encoding: string } | null> {
-    try {
-      const response = await this.request<unknown>(`/repos/${owner}/${repo}/readme`);
-      const responseObj = response as Record<string, unknown>;
-      return {
-        content: responseObj.content as string,
-        encoding: responseObj.encoding as string
-      };
-    } catch (error) {
-      if (error instanceof GitHubAPIError && error.status === 404) {
-        return null; // No README found
-      }
-      throw error;
-    }
-  }
-
-  async getPullRequestDiff({ owner, repo }: RepoInput, prNumber: number): Promise<string> {
-    const response = await this.request<string>(`/repos/${owner}/${repo}/pulls/${prNumber}`, {
-      headers: {
-        Accept: "application/vnd.github.v3.diff"
-      }
-    });
-    return response;
-  }
-
-  async getIssueComments({ owner, repo }: RepoInput, issueNumber: number): Promise<unknown[]> {
-    return this.request<unknown[]>(`/repos/${owner}/${repo}/issues/${issueNumber}/comments`);
-  }
-
-  async getPullRequestComments({ owner, repo }: RepoInput, prNumber: number): Promise<unknown[]> {
-    return this.request<unknown[]>(`/repos/${owner}/${repo}/pulls/${prNumber}/comments`);
   }
 }
 

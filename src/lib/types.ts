@@ -132,11 +132,6 @@ export const githubBranchSchema = z.object({
 });
 
 // Input Schemas for Tools
-export const repoInputSchema = z.object({
-  owner: z.string().describe("Repository owner (username or organization)"),
-  repo: z.string().describe("Repository name"),
-});
-
 export const issuesInputSchema = z.object({
   owner: z.string().describe("Repository owner"),
   repo: z.string().optional().describe("Repository name (required for repo-level, omitted for org-wide)"),
@@ -157,13 +152,6 @@ export const prsInputSchema = z.object({
   per_page: z.number().min(1).max(100).default(30).describe("Number of results per page"),
 });
 
-export const commitsInputSchema = z.object({
-  owner: z.string().describe("Repository owner"),
-  repo: z.string().describe("Repository name"),
-  sha: z.string().optional().describe("SHA or branch to start listing commits from"),
-  per_page: z.number().min(1).max(100).default(30).describe("Number of results per page"),
-});
-
 // Type exports
 export type GitHubUser = z.infer<typeof githubUserSchema>;
 export type GitHubRepo = z.infer<typeof githubRepoSchema>;
@@ -171,7 +159,5 @@ export type GitHubIssue = z.infer<typeof githubIssueSchema>;
 export type GitHubPR = z.infer<typeof githubPRSchema>;
 export type GitHubCommit = z.infer<typeof githubCommitSchema>;
 export type GitHubBranch = z.infer<typeof githubBranchSchema>;
-export type RepoInput = z.infer<typeof repoInputSchema>;
 export type IssuesInput = z.infer<typeof issuesInputSchema>;
 export type PRsInput = z.infer<typeof prsInputSchema>;
-export type CommitsInput = z.infer<typeof commitsInputSchema>;
