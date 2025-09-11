@@ -61,11 +61,14 @@ https://github.com/user-attachments/assets/ce0580cb-2049-4653-ac93-0ce406049818
 
 ### GitHub Token Setup
 
+
+
+https://github.com/user-attachments/assets/db9ffe57-2e7e-4bd8-b63f-bf9ce9c9fdfa
+
+
+
 1. Go to GitHub Settings > Developer settings > Personal access tokens(Fine-grained tokens)
-2. Generate a new token with these scopes:
-   - `public_repo` (for public repositories)
-   - `repo` (for private repositories, if needed)
-   - `read:user` (for user information)
+2. Generate a new token.
 
 ### Local Development
 
