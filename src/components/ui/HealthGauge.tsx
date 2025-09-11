@@ -106,7 +106,7 @@ interface HealthDashboardProps {
     total_prs: number;
     open_prs: number;
     merged_prs: number;
-    recent_commits: number;
+  
     active_contributors: number;
     activity_score: number;
   };

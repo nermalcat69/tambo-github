@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "init": "pnpm dlx tambo init"
+    "init": "bunx tambo init"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

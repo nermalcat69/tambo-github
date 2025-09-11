@@ -75,12 +75,7 @@ const defaultSuggestions: Suggestion[] = [
     detailedSuggestion: "Show me the 5 most recent pull requests in tambo-ai/tambo",
     messageId: "recent-prs",
   },
-  {
-    id: "suggestion-4",
-    title: "Commits to cloud repo",
-    detailedSuggestion: "Get the latest 10 commits from tambo-ai/tambo-cloud main branch",
-    messageId: "recent-cloud-commits",
-  },
+
   {
     id: "suggestion-5",
     title: "Star counts",
@@ -93,12 +88,7 @@ const defaultSuggestions: Suggestion[] = [
     detailedSuggestion: "Compare open and closed issue counts in tambo-ai/tambo",
     messageId: "issue-stats",
   },
-  {
-    id: "suggestion-7",
-    title: "Generate release notes",
-    detailedSuggestion: "Create AI-generated release notes for tambo-ai/tambo since the last tag",
-    messageId: "generate-release-notes",
-  },
+
 ];
 
 

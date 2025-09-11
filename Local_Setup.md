@@ -47,7 +47,7 @@ cp .env.example .env
 Edit `.env` and add your API keys:
 
 ```env
-NEXT_PUBLIC_TAMBO_API_KEY=your_tambo_api_key_here
+TAMBO_API_KEY=your_tambo_api_key_here
 NEXT_PUBLIC_TAMBO_URL=https://api.tambo.co
 GITHUB_TOKEN=your_github_personal_access_token_here
 ```
@@ -84,39 +84,14 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
    - `user:email` - Access user email addresses
 5. Click "Generate token"
 6. Copy the token immediately (you won't see it again)
-7. Add it to your `.env.local` file as `GITHUB_TOKEN`
+7. Add it to your `.env` file as `GITHUB_TOKEN`
 
 ### Tambo AI API Key
 
 1. Visit [tambo.co](https://tambo.co) and sign up/log in
 2. Navigate to your API settings
 3. Generate a new API key
-4. Copy the key and add it to your `.env.local` file as `NEXT_PUBLIC_TAMBO_API_KEY`
-
-### Project Structure
-
-```
-src/
-├── app/                    # Next.js App Router
-│   ├── globals.css        # Global styles
-│   ├── layout.tsx         # Root layout
-│   └── page.tsx           # Main page
-├── components/
-│   ├── tambo/             # Tambo-specific components
-│   └── ui/                # UI components
-│       ├── GitHubSidebar.tsx
-│       ├── IssueCard.tsx
-│       ├── PRCard.tsx
-│       ├── ReleaseNotes.tsx
-│       └── ...
-├── lib/
-│   ├── tambo.ts           # Tambo configuration
-│   ├── types.ts           # TypeScript types
-│   └── utils.ts           # Utility functions
-└── services/
-    ├── github-api.ts      # GitHub API client
-    └── github-tools.ts    # GitHub tools for Tambo
-```
+4. Copy the key and add it to your `.env` file as `TAMBO_API_KEY`
 
 ## Development Workflow
 
@@ -151,7 +126,7 @@ bun run lint
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `NEXT_PUBLIC_TAMBO_API_KEY` | Your Tambo AI API key | Yes |
+| `TAMBO_API_KEY` | Your Tambo AI API key | Yes |
 | `NEXT_PUBLIC_TAMBO_URL` | Tambo API endpoint | Yes |
 | `GITHUB_TOKEN` | GitHub Personal Access Token | Yes |
 
@@ -162,7 +137,7 @@ bun run lint
 **1. "Invalid API Key" Error**
 - Verify your Tambo API key is correct
 - Ensure the key has proper permissions
-- Check that `NEXT_PUBLIC_TAMBO_API_KEY` is set in `.env.local`
+- Check that `TAMBO_API_KEY` is set in `.env`
 
 **2. GitHub API Rate Limiting**
 - Ensure your GitHub token is valid
@@ -175,7 +150,7 @@ bun run lint
 - Clear `.next` folder and rebuild
 
 **4. Environment Variables Not Loading**
-- Ensure `.env.local` is in the project root
+- Ensure `.env` is in the project root
 - Restart the development server after changes
 - Check that variables start with `NEXT_PUBLIC_` for client-side access
 

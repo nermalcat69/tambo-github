@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { resolveGitHubIntent } from "../../services/resolve-github-intent";
-import { getOrganizationRepositories, getRepositoryIssues, getRepositoryPRs } from "../../services/github-tools";
+import { resolveGitHubIntent } from "@/services/resolve-github-intent";
+import { getOrganizationRepositories, getRepositoryIssues, getRepositoryPRs } from "@/services/github-tools";
 
 export default function TestGitHubPage() {
   const [result, setResult] = useState<string | null>(null);

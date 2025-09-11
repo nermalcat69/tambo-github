@@ -19,7 +19,7 @@ npx tambo full-send // to add to an existing project & include tambo-ai api key
 ```
 
 Alternative manual setup to get key:
-   - Rename `example.env.local` to `.env.local`
+   - Rename `example.env` to `.env`
    - Add your Tambo API key from tambo.co/cli-auth
 
 ```
@@ -28,7 +28,7 @@ Needs to be a client component:
 
 ```typescript
 <TamboProvider
-  apiKey={process.env.NEXT_PUBLIC_TAMBO_API_KEY!}
+  apiKey={process.env.TAMBO_API_KEY!}
   components={components}
 >
   {children}
@@ -66,7 +66,7 @@ MCP extends Tambo's capabilities by connecting to external tool providers. To se
 1. Wrap your TamboProvider with TamboMcpProvider:
 
 ```typescript
-<TamboProvider apiKey={process.env.NEXT_PUBLIC_TAMBO_API_KEY!} components={components} tools={tools}>
+<TamboProvider apiKey={process.env.TAMBO_API_KEY!} components={components} tools={tools}>
   <TamboMcpProvider mcpServers={mcpServers}>
     {children}
   </TamboMcpProvider>
@@ -107,7 +107,7 @@ src/
   │   └── tambo.ts          # Tambo configuration and setup: component registration, tool configuration, etc.
 
 # Key Files
-.env.local                   # Environment variables (renamed from example.env.local)
+.env                   # Environment variables (renamed from example.env)
 tailwind.config.ts          # Tailwind CSS configuration
 ```
 

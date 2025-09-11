@@ -1,25 +1,20 @@
-/**
- * @file tambo.ts
- * @description Central configuration file for Tambo components and tools (robust + NL-friendly)
- */
-
 import { z } from "zod";
 import type { TamboComponent, TamboTool } from "@tambo-ai/react";
-import { RepoCard } from "../components/ui/RepoCard";
-import { PRCard } from "../components/ui/PRCard";
-import { IssueCard } from "../components/ui/IssueCard";
-import { ObjectRenderer } from "../components/ui/ObjectRenderer";
-import { GridLayout } from "../components/ui/GridLayout";
-import { HealthGauge, HealthDashboard } from "../components/ui/HealthGauge";
-import { Timeline } from "../components/ui/Timeline";
-import { ReleaseNotes } from "../components/ui/ReleaseNotes";
-import { githubRepoSchema, githubIssueSchema, githubPRSchema } from "./types";
+import { RepoCard } from "@/components/ui/RepoCard";
+import { PRCard } from "@/components/ui/PRCard";
+import { IssueCard } from "@/components/ui/IssueCard";
+import { ObjectRenderer } from "@/components/ui/ObjectRenderer";
+import { GridLayout } from "@/components/ui/GridLayout";
+import { HealthGauge, HealthDashboard } from "@/components/ui/HealthGauge";
+
+
+import { githubRepoSchema, githubIssueSchema, githubPRSchema } from "@/lib/types";
 import {
   getOrganizationRepositories,
   getRepositoryIssues,
   getRepositoryPRs,
-} from "../services/github-tools";
-import { resolveGitHubIntent } from "../services/resolve-github-intent";
+} from "@/services/github-tools";
+import { resolveGitHubIntent } from "@/services/resolve-github-intent";
 
 
 /* -------------------------------------------------------------------------- */
@@ -241,23 +236,6 @@ export const components: TamboComponent[] = [
       data: z.object({}).optional(),
     }),
   },
-  {
-    name: "Timeline",
-    description:
-      "Vertical timeline for repo events (commits, PRs, issues, releases) with timestamps.",
-    component: Timeline,
-    propsSchema: z.object({
-      events: z.array(z.unknown()).optional(),
-    }),
-  },
-  {
-    name: "ReleaseNotes",
-    description:
-      "Formatted release notes viewer (version, features, fixes, breaking changes, credits).",
-    component: ReleaseNotes,
-    propsSchema: z.object({
-      version: z.string().optional(),
-      notes: z.string().optional(),
-    }),
-  },
+  
+
 ];

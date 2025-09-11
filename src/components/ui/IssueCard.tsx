@@ -1,7 +1,7 @@
 "use client";
 
-import { GitHubIssue } from "../../lib/types";
-import { useChatInput } from "../../contexts/chat-input-context";
+import { GitHubIssue } from "@/lib/types";
+import { useChatInput } from "@/contexts/chat-input-context";
 import { AlertCircle, MessageCircle, Calendar, User, CheckCircle } from "lucide-react";
 
 interface IssueCardProps {

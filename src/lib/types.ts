@@ -97,29 +97,10 @@ export const githubPRSchema = z.object({
   deletions: z.number().optional(),
   comments: z.number().optional(),
   review_comments: z.number().optional(),
-  commits: z.number().optional(),
+
 });
 
-// GitHub Commit Schema
-export const githubCommitSchema = z.object({
-  sha: z.string(),
-  commit: z.object({
-    message: z.string(),
-    author: z.object({
-      name: z.string(),
-      email: z.string(),
-      date: z.string(),
-    }),
-    committer: z.object({
-      name: z.string(),
-      email: z.string(),
-      date: z.string(),
-    }),
-  }),
-  author: githubUserSchema.nullable(),
-  committer: githubUserSchema.nullable(),
-  html_url: z.string(),
-});
+
 
 // GitHub Branch Schema
 export const githubBranchSchema = z.object({
@@ -157,7 +138,7 @@ export type GitHubUser = z.infer<typeof githubUserSchema>;
 export type GitHubRepo = z.infer<typeof githubRepoSchema>;
 export type GitHubIssue = z.infer<typeof githubIssueSchema>;
 export type GitHubPR = z.infer<typeof githubPRSchema>;
-export type GitHubCommit = z.infer<typeof githubCommitSchema>;
+
 export type GitHubBranch = z.infer<typeof githubBranchSchema>;
 export type IssuesInput = z.infer<typeof issuesInputSchema>;
 export type PRsInput = z.infer<typeof prsInputSchema>;
