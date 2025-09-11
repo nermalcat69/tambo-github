@@ -102,9 +102,13 @@ class GitHubAPI {
   }: IssuesInput): Promise<GitHubIssue[]> {
     console.log(`[GitHub API] Fetching repo-level issues for ${owner}/${repo}`, { state, labels, assignee, per_page, page });
     
+    // Request more items than needed to account for PR filtering
+    // GitHub issues endpoint returns both issues and PRs, so we need to filter
+    const requestPerPage = Math.min(100, per_page * 3); // Request 3x to account for PRs
+    
     const params = new URLSearchParams();
     params.set("state", state);
-    params.set("per_page", String(per_page));
+    params.set("per_page", String(requestPerPage));
     params.set("page", String(page));
     if (labels) params.set("labels", labels);
     if (assignee) params.set("assignee", assignee);
@@ -140,50 +144,52 @@ class GitHubAPI {
           return !isPR;
         }) : [];
       
+      // Limit to the requested number of issues
+      const limitedIssues = issuesOnly.slice(0, per_page);
+      
       console.log(`[GitHub API] Filtered repo issues (excluding PRs):`, {
-        count: issuesOnly.length,
+        count: limitedIssues.length,
         originalCount: dataArray.length,
-        filteredCount: dataArray.length - issuesOnly.length
+        filteredCount: dataArray.length - issuesOnly.length,
+        requestedCount: per_page
       });
       
-      // Fallback: If all items are PRs and user asked for issues, try with different parameters
-      if (issuesOnly.length === 0 && dataArray.length > 0) {
+      // Fallback: If we don't have enough issues, try to get more
+      if (limitedIssues.length < per_page && limitedIssues.length === 0 && dataArray.length > 0) {
         console.log(`[GitHub API] All items are PRs, trying alternative approach...`);
         
         // Try with issue-specific filter
         const issueParams = new URLSearchParams();
         issueParams.set("state", state);
-        issueParams.set("per_page", String(per_page));
+        issueParams.set("per_page", String(Math.min(100, per_page * 5))); // Try even more
         issueParams.set("page", String(page));
         if (labels) issueParams.set("labels", labels);
         if (assignee) issueParams.set("assignee", assignee);
         
-        // Add issue filter to explicitly exclude PRs
-        issueParams.set("filter", "issues");
-        
         const issueEndpoint = `/repos/${owner}/${repo}/issues?${issueParams.toString()}`;
-        console.log(`[GitHub API] Trying with issue filter: ${this.baseUrl}${issueEndpoint}`);
+        console.log(`[GitHub API] Trying with more items: ${this.baseUrl}${issueEndpoint}`);
         
         try {
           const issueData = await this.request<unknown[]>(issueEndpoint);
-          console.log(`[GitHub API] With issue filter:`, { count: issueData.length });
+          console.log(`[GitHub API] With more items:`, { count: issueData.length });
           
           const filteredIssues = Array.isArray(issueData) ? issueData.filter((item: unknown) => !(item as Record<string, unknown>).pull_request) : [];
-          console.log(`[GitHub API] Filtered issues with issue filter:`, { count: filteredIssues.length });
+          const limitedFallbackIssues = filteredIssues.slice(0, per_page);
+          console.log(`[GitHub API] Filtered issues with fallback:`, { count: limitedFallbackIssues.length });
           
-          if (filteredIssues.length > 0) {
-            return filteredIssues.map(item => githubIssueSchema.parse(item));
+          if (limitedFallbackIssues.length > 0) {
+            return limitedFallbackIssues.map(item => githubIssueSchema.parse(item));
           }
         } catch (fallbackError) {
           console.log(`[GitHub API] Fallback approach failed:`, fallbackError);
         }
       }
       
-      if (issuesOnly.length === 0 && dataArray.length > 0) {
+      if (limitedIssues.length === 0 && dataArray.length > 0) {
         console.log(`[GitHub API] Warning: All ${dataArray.length} items were filtered out as PRs. The repository may have only PRs in the requested state.`);
       }
       
-      return issuesOnly.map(item => githubIssueSchema.parse(item));
+      return limitedIssues.map(item => githubIssueSchema.parse(item));
     } catch (error) {
       if (error instanceof GitHubAPIError && error.status === 403) {
         throw new GitHubAPIError(`Access denied to ${owner}/${repo} issues. This repository may require "Issues: read" permission for your token. Check your fine-grained PAT permissions.`, 403);

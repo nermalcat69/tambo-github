@@ -128,16 +128,6 @@ export function PRCard({ pr, onSelect }: PRCardProps) {
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-xs text-gray-600">
-              <div className="flex items-center gap-1">
-                <MessageCircle className="w-3 h-3" />
-                <span>{(pr as GitHubPR).comments || 0}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <FileText className="w-3 h-3" />
-                <span>{(pr as GitHubPR).changed_files || 0} files</span>
-              </div>
-            </div>
             
             {(pr as GitHubPR).labels && (pr as GitHubPR).labels.length > 0 && (
               <div className="flex gap-1">
