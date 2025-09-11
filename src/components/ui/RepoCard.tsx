@@ -2,7 +2,7 @@
 
 import { GitHubRepo } from "@/lib/types";
 import { useChatInput } from "@/contexts/chat-input-context";
-import { Star, GitFork, Eye, Calendar, ExternalLink, FileText, GitPullRequest, AlertCircle, Sparkles } from "lucide-react";
+import { Star, GitFork, Eye, Calendar, ExternalLink, GitPullRequest, AlertCircle } from "lucide-react";
 
 interface RepoCardProps {
   repo?: GitHubRepo | unknown; // Allow raw objects for delegation
@@ -10,7 +10,10 @@ interface RepoCardProps {
   isSelected?: boolean;
 }
 
-export function RepoCard({ repo, onSelect, isSelected = false }: RepoCardProps) {
+export function RepoCard({ repo, onSelect }: RepoCardProps) {
+  // React hooks must be called at the top level
+  const { setInputValue } = useChatInput();
+  
   // Handle undefined repo prop
   if (!repo) {
     return (
@@ -22,7 +25,7 @@ export function RepoCard({ repo, onSelect, isSelected = false }: RepoCardProps) 
 
   // Handle raw objects - detect if this is a repository object
   if (typeof repo === 'object' && repo !== null) {
-    const repoObj = repo as Record<string, any>;
+    const repoObj = repo as Record<string, unknown>;
     // If it doesn't look like a repository, return a fallback
     if (!repoObj.id || !repoObj.name || !repoObj.owner) {
       return (
@@ -57,8 +60,6 @@ export function RepoCard({ repo, onSelect, isSelected = false }: RepoCardProps) 
       year: 'numeric'
     });
   };
-
-  const { setInputValue } = useChatInput();
 
   const handleActionClick = (action: 'prs' | 'issues') => {
     if (action === 'prs') {

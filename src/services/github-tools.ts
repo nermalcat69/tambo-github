@@ -5,10 +5,6 @@ import {
   issuesInputSchema,
   prsInputSchema,
   commitsInputSchema,
-  githubRepoSchema,
-  githubIssueSchema,
-  githubPRSchema,
-  githubCommitSchema,
 } from "@/lib/types";
 
 // Repository Tools

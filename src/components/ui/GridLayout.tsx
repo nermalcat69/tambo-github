@@ -50,7 +50,8 @@ export function GridLayout({
     <div className={`grid gap-4 ${gridClasses[columns]}`}>
       {validItems.map((item, index) => {
         // Use item's id if available, otherwise fall back to index
-        const key = (item as any)?.id || (item as any)?.number || index;
+        const itemObj = item as Record<string, unknown>;
+        const key = (itemObj?.id as string | number) || (itemObj?.number as string | number) || index;
         return (
           <ObjectRenderer
             key={key}

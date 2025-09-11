@@ -2,8 +2,7 @@
 
 import { GitHubPR } from "@/lib/types";
 import { useChatInput } from "@/contexts/chat-input-context";
-import { githubAPI } from "@/services/github-api";
-import { GitPullRequest, MessageCircle, Calendar, User, CheckCircle, XCircle, Clock, Brain, AlertTriangle, TrendingUp, ExternalLink, FileText } from "lucide-react";
+import { GitPullRequest, MessageCircle, Calendar, User, CheckCircle, XCircle, Clock, FileText } from "lucide-react";
 
 interface PRCardProps {
   pr?: GitHubPR | unknown; // Allow raw objects for delegation
@@ -11,8 +10,8 @@ interface PRCardProps {
   isSelected?: boolean;
 }
 
-export function PRCard({ pr, onSelect, isSelected = false }: PRCardProps) {
-  const { setInputValue } = useChatInput();
+export function PRCard({ pr, onSelect }: PRCardProps) {
+  const { } = useChatInput();
   // Handle undefined pr prop
   if (!pr) {
     return (
@@ -24,13 +23,14 @@ export function PRCard({ pr, onSelect, isSelected = false }: PRCardProps) {
 
   // Handle raw objects - detect if this is a PR object
   if (typeof pr === 'object' && pr !== null) {
+    const prObj = pr as Record<string, unknown>;
     // If it doesn't look like a PR, return a fallback
-    if (!(pr as any).id || !(pr as any).title || !(pr as any).number || !(pr as any).head || !(pr as any).base) {
+    if (!prObj.id || !prObj.title || !prObj.number || !prObj.head || !prObj.base) {
       return (
         <div className="border rounded-md p-3 border-gray-200 bg-gray-50">
           <div className="text-xs text-gray-500">Invalid pull request data</div>
           <div className="text-xs text-gray-400 mt-1">
-            Keys: {Object.keys(pr as any).join(', ')}
+            Keys: {Object.keys(prObj).join(', ')}
           </div>
         </div>
       );
@@ -141,12 +141,12 @@ export function PRCard({ pr, onSelect, isSelected = false }: PRCardProps) {
             
             {(pr as GitHubPR).labels && (pr as GitHubPR).labels.length > 0 && (
               <div className="flex gap-1">
-                {(pr as GitHubPR).labels.slice(0, 2).map((label: Record<string, any>, index: number) => (
+                {(pr as GitHubPR).labels.slice(0, 2).map((label: Record<string, unknown>, index: number) => (
                   <span
-                    key={`${label.name}-${index}`}
+                    key={`${label.name as string}-${index}`}
                     className="px-2 py-1 text-xs bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-full"
                   >
-                    {label.name}
+                    {label.name as string}
                   </span>
                 ))}
                 {(pr as GitHubPR).labels.length > 2 && (

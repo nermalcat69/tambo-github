@@ -2,7 +2,7 @@
 
 import { GitHubIssue } from "@/lib/types";
 import { useChatInput } from "@/contexts/chat-input-context";
-import { AlertCircle, MessageCircle, Calendar, User, CheckCircle, XCircle, Bug, FileText, Lightbulb, Brain, Clock } from "lucide-react";
+import { AlertCircle, MessageCircle, Calendar, User, CheckCircle } from "lucide-react";
 
 interface IssueCardProps {
   issue?: GitHubIssue | unknown; // Allow raw objects for delegation
@@ -10,8 +10,8 @@ interface IssueCardProps {
   isSelected?: boolean;
 }
 
-export function IssueCard({ issue, onSelect, isSelected = false }: IssueCardProps) {
-  const { setInputValue } = useChatInput();
+export function IssueCard({ issue, onSelect }: IssueCardProps) {
+  const { } = useChatInput();
   // Handle undefined issue prop
   if (!issue) {
     return (
@@ -23,7 +23,7 @@ export function IssueCard({ issue, onSelect, isSelected = false }: IssueCardProp
 
   // Handle raw objects - detect if this is an issue object
   if (typeof issue === 'object' && issue !== null) {
-    const issueObj = issue as Record<string, any>;
+    const issueObj = issue as Record<string, unknown>;
     // If it doesn't look like an issue, return a fallback
     if (!issueObj.id || !issueObj.title || !issueObj.number || !issueObj.state) {
       return (
@@ -124,12 +124,12 @@ export function IssueCard({ issue, onSelect, isSelected = false }: IssueCardProp
             
             {issueData.labels && issueData.labels.length > 0 && (
               <div className="flex gap-1">
-                {issueData.labels.slice(0, 2).map((label: Record<string, any>, index: number) => (
+                {issueData.labels.slice(0, 2).map((label: Record<string, unknown>, index: number) => (
                   <span
-                    key={label.id || `${label.name}-${index}`}
+                    key={(label.id as string | number) || `${label.name as string}-${index}`}
                     className="px-2 py-1 text-xs bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-full"
                   >
-                    {label.name}
+                    {label.name as string}
                   </span>
                 ))}
                 {issueData.labels.length > 2 && (

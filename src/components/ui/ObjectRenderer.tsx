@@ -4,7 +4,7 @@ import React from "react";
 import { RepoCard } from "./RepoCard";
 import { IssueCard } from "./IssueCard";
 import { PRCard } from "./PRCard";
-import { GitHubRepo, GitHubIssue, GitHubPR } from "@/lib/types";
+
 
 /**
  * Utility component that detects object types and delegates to appropriate card components.
@@ -28,7 +28,7 @@ const toText = (v: unknown) => {
   }
 };
 
-export function ObjectRenderer({ data, index = 0, onSelect, isSelected = false }: ObjectRendererProps) {
+export function ObjectRenderer({ data, onSelect, isSelected = false }: ObjectRendererProps) {
   // Handle non-objects
   if (typeof data !== "object" || data === null) {
     return (
@@ -43,7 +43,7 @@ export function ObjectRenderer({ data, index = 0, onSelect, isSelected = false }
     return null;
   }
 
-  const obj = data as Record<string, any>;
+  const obj = data as Record<string, unknown>;
 
   // Detect repository objects
   if (obj.id && (obj.name || obj.full_name) && obj.owner && typeof obj.stargazers_count !== 'undefined') {
@@ -57,16 +57,21 @@ export function ObjectRenderer({ data, index = 0, onSelect, isSelected = false }
   }
 
   // Detect PR objects - add debug logging
-  const isPR = obj.id && obj.title && obj.number && obj.state && obj.html_url && obj.user?.login && obj.head && obj.base?.repo?.owner?.login;
+  const userObj = obj.user as Record<string, unknown> | undefined;
+  const baseObj = obj.base as Record<string, unknown> | undefined;
+  const repoObj = baseObj?.repo as Record<string, unknown> | undefined;
+  const ownerObj = repoObj?.owner as Record<string, unknown> | undefined;
+  
+  const isPR = obj.id && obj.title && obj.number && obj.state && obj.html_url && userObj?.login && obj.head && ownerObj?.login;
   console.log('[ObjectRenderer] PR Detection:', {
     hasId: !!obj.id,
     hasTitle: !!obj.title,
     hasNumber: !!obj.number,
     hasState: !!obj.state,
     hasHtmlUrl: !!obj.html_url,
-    hasUserLogin: !!obj.user?.login,
+    hasUserLogin: !!userObj?.login,
     hasHead: !!obj.head,
-    hasBaseRepoOwner: !!obj.base?.repo?.owner?.login,
+    hasBaseRepoOwner: !!ownerObj?.login,
     isPR,
     keys: Object.keys(obj).slice(0, 10) // First 10 keys for debugging
   });

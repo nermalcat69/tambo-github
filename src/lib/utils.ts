@@ -13,7 +13,7 @@ if (typeof globalThis !== 'undefined' && !globalThis.crypto?.randomUUID) {
   }
   
   // Add randomUUID polyfill
-  (globalThis.crypto as any).randomUUID = function(): string {
+  (globalThis.crypto as unknown as Record<string, unknown>).randomUUID = function(): string {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       const r = Math.random() * 16 | 0;
       const v = c === 'x' ? r : (r & 0x3 | 0x8);

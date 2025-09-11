@@ -87,7 +87,7 @@ class GitHubAPI {
   }
 
   async getRepository({ owner, repo }: RepoInput): Promise<GitHubRepo> {
-    const data = await this.request<any>(`/repos/${owner}/${repo}`);
+    const data = await this.request<unknown>(`/repos/${owner}/${repo}`);
     return githubRepoSchema.parse(data);
   }
 
@@ -114,37 +114,40 @@ class GitHubAPI {
     console.log(`[GitHub API] Repo issues params:`, Object.fromEntries(params.entries()));
   
     try {
-      const data = await this.request<any[]>(endpoint);
-      console.log(`[GitHub API] Raw repo issues response:`, { count: data.length, hasToken: !!this.token });
+      const data = await this.request<unknown[]>(endpoint);
+      const dataArray = data as unknown[];
+      console.log(`[GitHub API] Raw repo issues response:`, { count: dataArray.length, hasToken: !!this.token });
       
       // Debug: Log the first few items to see what we're getting
-      if (data.length > 0) {
+      if (dataArray.length > 0) {
+        const firstItem = dataArray[0] as Record<string, unknown>;
         console.log(`[GitHub API] First item type check:`, {
-          hasPullRequest: data[0].pull_request,
-          isPR: !!data[0].pull_request,
-          url: data[0].html_url,
-          title: data[0].title,
-          number: data[0].number
+          hasPullRequest: firstItem.pull_request,
+          isPR: !!firstItem.pull_request,
+          url: firstItem.html_url,
+          title: firstItem.title,
+          number: firstItem.number
         });
       }
   
       // Filter PRs only AFTER we know we received items
-      const issuesOnly = Array.isArray(data) ? data.filter((item: any) => {
-        const isPR = !!item.pull_request;
-        if (isPR) {
-          console.log(`[GitHub API] Filtering out PR: #${item.number} - ${item.title}`);
-        }
-        return !isPR;
-      }) : [];
+        const issuesOnly = Array.isArray(dataArray) ? dataArray.filter((item: unknown) => {
+          const itemObj = item as Record<string, unknown>;
+          const isPR = !!itemObj.pull_request;
+          if (isPR) {
+            console.log(`[GitHub API] Filtering out PR:`, { number: itemObj.number, title: itemObj.title });
+          }
+          return !isPR;
+        }) : [];
       
       console.log(`[GitHub API] Filtered repo issues (excluding PRs):`, {
         count: issuesOnly.length,
-        originalCount: data.length,
-        filteredCount: data.length - issuesOnly.length
+        originalCount: dataArray.length,
+        filteredCount: dataArray.length - issuesOnly.length
       });
       
       // Fallback: If all items are PRs and user asked for issues, try with different parameters
-      if (issuesOnly.length === 0 && data.length > 0) {
+      if (issuesOnly.length === 0 && dataArray.length > 0) {
         console.log(`[GitHub API] All items are PRs, trying alternative approach...`);
         
         // Try with issue-specific filter
@@ -162,10 +165,10 @@ class GitHubAPI {
         console.log(`[GitHub API] Trying with issue filter: ${this.baseUrl}${issueEndpoint}`);
         
         try {
-          const issueData = await this.request<any[]>(issueEndpoint);
+          const issueData = await this.request<unknown[]>(issueEndpoint);
           console.log(`[GitHub API] With issue filter:`, { count: issueData.length });
           
-          const filteredIssues = Array.isArray(issueData) ? issueData.filter((item: any) => !item.pull_request) : [];
+          const filteredIssues = Array.isArray(issueData) ? issueData.filter((item: unknown) => !(item as Record<string, unknown>).pull_request) : [];
           console.log(`[GitHub API] Filtered issues with issue filter:`, { count: filteredIssues.length });
           
           if (filteredIssues.length > 0) {
@@ -176,8 +179,8 @@ class GitHubAPI {
         }
       }
       
-      if (issuesOnly.length === 0 && data.length > 0) {
-        console.log(`[GitHub API] Warning: All ${data.length} items were filtered out as PRs. The repository may have only PRs in the requested state.`);
+      if (issuesOnly.length === 0 && dataArray.length > 0) {
+        console.log(`[GitHub API] Warning: All ${dataArray.length} items were filtered out as PRs. The repository may have only PRs in the requested state.`);
       }
       
       return issuesOnly.map(item => githubIssueSchema.parse(item));
@@ -220,7 +223,7 @@ class GitHubAPI {
     console.log(`[GitHub API] Org issues params:`, { q, ...Object.fromEntries(params.entries()) });
   
     try {
-      const data = await this.request<{ total_count: number; items: any[] }>(endpoint);
+      const data = await this.request<{ total_count: number; items: unknown[] }>(endpoint);
       console.log(`[GitHub API] Raw org issues search response:`, { total_count: data.total_count, items_count: data.items.length, hasToken: !!this.token });
   
       // Defensive filtering - ensure items is an array
@@ -252,7 +255,7 @@ class GitHubAPI {
     if (base) params.append("base", base);
     if (head) params.append("head", head);
 
-    const data = await this.request<any[]>(`/repos/${owner}/${repo}/pulls?${params}`);
+    const data = await this.request<unknown[]>(`/repos/${owner}/${repo}/pulls?${params}`);
     return data.map(item => githubPRSchema.parse(item));
   }
 
@@ -268,22 +271,22 @@ class GitHubAPI {
 
     if (sha) params.append("sha", sha);
 
-    const data = await this.request<any[]>(`/repos/${owner}/${repo}/commits?${params}`);
+    const data = await this.request<unknown[]>(`/repos/${owner}/${repo}/commits?${params}`);
     return data.map(item => githubCommitSchema.parse(item));
   }
 
   async getRepositoryBranches({ owner, repo }: RepoInput): Promise<GitHubBranch[]> {
-    const data = await this.request<any[]>(`/repos/${owner}/${repo}/branches`);
+    const data = await this.request<unknown[]>(`/repos/${owner}/${repo}/branches`);
     return data.map(branch => githubBranchSchema.parse(branch));
   }
 
   async getPullRequest({ owner, repo }: RepoInput, prNumber: number): Promise<GitHubPR> {
-    const data = await this.request<any>(`/repos/${owner}/${repo}/pulls/${prNumber}`);
+    const data = await this.request<unknown>(`/repos/${owner}/${repo}/pulls/${prNumber}`);
     return githubPRSchema.parse(data);
   }
 
   async getIssue({ owner, repo }: RepoInput, issueNumber: number): Promise<GitHubIssue> {
-    const data = await this.request<any>(`/repos/${owner}/${repo}/issues/${issueNumber}`);
+    const data = await this.request<unknown>(`/repos/${owner}/${repo}/issues/${issueNumber}`);
     return githubIssueSchema.parse(data);
   }
 
@@ -292,7 +295,7 @@ class GitHubAPI {
       q: query,
       per_page: per_page.toString(),
     });
-    const data = await this.request<{ items: any[] }>(`/search/repositories?${params}`);
+    const data = await this.request<{ items: unknown[] }>(`/search/repositories?${params}`);
     return data.items.map(item => githubRepoSchema.parse(item));
   }
 
@@ -302,7 +305,7 @@ class GitHubAPI {
       sort: 'updated',
       direction: 'desc'
     });
-    const data = await this.request<any[]>(`/orgs/${org}/repos?${params}`);
+    const data = await this.request<unknown[]>(`/orgs/${org}/repos?${params}`);
     return data.map(item => githubRepoSchema.parse(item));
   }
 
@@ -312,12 +315,12 @@ class GitHubAPI {
       sort: 'updated',
       direction: 'desc'
     });
-    const data = await this.request<any[]>(`/users/${username}/repos?${params}`);
+    const data = await this.request<unknown[]>(`/users/${username}/repos?${params}`);
     return data.map(item => githubRepoSchema.parse(item));
   }
 
   async getRateLimit() {
-    return this.request<any>("/rate_limit");
+    return this.request<unknown>("/rate_limit");
   }
 
   // Action methods (require write permissions)
@@ -364,10 +367,11 @@ class GitHubAPI {
   // Methods for summarization data
   async getRepositoryReadme({ owner, repo }: RepoInput): Promise<{ content: string; encoding: string } | null> {
     try {
-      const response = await this.request<any>(`/repos/${owner}/${repo}/readme`);
+      const response = await this.request<unknown>(`/repos/${owner}/${repo}/readme`);
+      const responseObj = response as Record<string, unknown>;
       return {
-        content: response.content,
-        encoding: response.encoding
+        content: responseObj.content as string,
+        encoding: responseObj.encoding as string
       };
     } catch (error) {
       if (error instanceof GitHubAPIError && error.status === 404) {
@@ -386,12 +390,12 @@ class GitHubAPI {
     return response;
   }
 
-  async getIssueComments({ owner, repo }: RepoInput, issueNumber: number): Promise<any[]> {
-    return this.request<any[]>(`/repos/${owner}/${repo}/issues/${issueNumber}/comments`);
+  async getIssueComments({ owner, repo }: RepoInput, issueNumber: number): Promise<unknown[]> {
+    return this.request<unknown[]>(`/repos/${owner}/${repo}/issues/${issueNumber}/comments`);
   }
 
-  async getPullRequestComments({ owner, repo }: RepoInput, prNumber: number): Promise<any[]> {
-    return this.request<any[]>(`/repos/${owner}/${repo}/pulls/${prNumber}/comments`);
+  async getPullRequestComments({ owner, repo }: RepoInput, prNumber: number): Promise<unknown[]> {
+    return this.request<unknown[]>(`/repos/${owner}/${repo}/pulls/${prNumber}/comments`);
   }
 }
 

@@ -42,7 +42,7 @@ const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(ma
 /** Convert Zod schema to Tambo-compatible schema */
 const createTamboSchema = (zodSchema: z.ZodType) => {
   // Return a Zod function schema as expected by TamboTool interface
-  return z.function().args(zodSchema).returns(z.any());
+  return z.function().args(zodSchema).returns(z.unknown());
 };
 
 /** Per-page schema with aliases */
@@ -129,7 +129,7 @@ export const tools: TamboTool[] = [
           };
           return await getRepositoryCommits(commitParams);
         default:
-          throw new Error(`Unknown intent kind: ${(intent as any).kind}`);
+          throw new Error(`Unknown intent kind: ${(intent as Record<string, unknown>).kind}`);
       }
     },
     toolSchema: createTamboSchema(z.object({
@@ -414,7 +414,7 @@ export const components: TamboComponent[] = [
       "Vertical timeline for repo events (commits, PRs, issues, releases) with timestamps.",
     component: Timeline,
     propsSchema: z.object({
-      events: z.array(z.any()).optional(),
+      events: z.array(z.unknown()).optional(),
     }),
   },
   {

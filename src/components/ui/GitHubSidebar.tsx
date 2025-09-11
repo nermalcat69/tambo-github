@@ -13,11 +13,16 @@ interface GitHubSidebarProps {
 
 export function GitHubSidebar({
   selectedRepo,
-  repositories = [],
-  issues = [],
-  prs = [],
-  onRepoSelect
+  repositories: _repositories = [],
+  issues: _issues = [],
+  prs: _prs = [],
+  onRepoSelect: _onRepoSelect
 }: GitHubSidebarProps) {
+  // Suppress unused variable warnings - these will be used when implementing actual functionality
+  void _repositories;
+  void _issues;
+  void _prs;
+  void _onRepoSelect;
   const formatNumber = (num: number | undefined) => {
     if (num == null || num === undefined) {
       return '0';
