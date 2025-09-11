@@ -42,7 +42,7 @@ cp .env.example .env
 Add your API keys to `.env`:
 
 ```env
-TAMBO_API_KEY=your_tambo_api_key
+NEXT_PUBLIC_TAMBO_API_KEY=your_NEXT_PUBLIC_TAMBO_API_KEY
 NEXT_PUBLIC_TAMBO_URL=https://api.tambo.co
 GITHUB_TOKEN=your_github_personal_access_token
 EXASEARCH_API_KEY=your_exa_api_key
@@ -51,8 +51,6 @@ EXASEARCH_API_KEY=your_exa_api_key
 ### API Keys Setup
 
 #### Tambo API Key
-
-
 
 https://github.com/user-attachments/assets/ce0580cb-2049-4653-ac93-0ce406049818
 
@@ -87,7 +85,7 @@ The application will be available at `http://localhost:3000`
 Configure your API keys:
 
 ```bash
-TAMBO_API_KEY=your_tambo_api_key_here
+NEXT_PUBLIC_TAMBO_API_KEY=your_NEXT_PUBLIC_TAMBO_API_KEY_here
 GITHUB_TOKEN=your_github_token_here
 ```
 
@@ -96,7 +94,9 @@ GITHUB_TOKEN=your_github_token_here
 - "Find 4 repositories in vercel org"
 - "show me 5 issues from facebook/react"
 - "find me 2 prs from vercel/examples"
-- "Generate release notes for the latest version"
+- "Get repository health metrics for tambo-ai/tambo"
+- "Show me open issues with bug label from microsoft/vscode"
+- "Find recent pull requests from the main branch"
 
 ## Resources
 

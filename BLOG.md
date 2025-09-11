@@ -148,7 +148,7 @@ export const tools: TamboTool[] = [
    Add your credentials:
    ```env
    GITHUB_TOKEN=your_github_token_here
-   TAMBO_API_KEY=your_tambo_api_key_here
+   NEXT_PUBLIC_TAMBO_API_KEY=your_NEXT_PUBLIC_TAMBO_API_KEY_here
    ```
 
 3. **Run Development Server**

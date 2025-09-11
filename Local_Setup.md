@@ -47,7 +47,7 @@ cp .env.example .env
 Edit `.env` and add your API keys:
 
 ```env
-TAMBO_API_KEY=your_tambo_api_key_here
+NEXT_PUBLIC_TAMBO_API_KEY=your_NEXT_PUBLIC_TAMBO_API_KEY_here
 NEXT_PUBLIC_TAMBO_URL=https://api.tambo.co
 GITHUB_TOKEN=your_github_personal_access_token_here
 ```
@@ -91,7 +91,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 1. Visit [tambo.co](https://tambo.co) and sign up/log in
 2. Navigate to your API settings
 3. Generate a new API key
-4. Copy the key and add it to your `.env` file as `TAMBO_API_KEY`
+4. Copy the key and add it to your `.env` file as `NEXT_PUBLIC_TAMBO_API_KEY`
 
 ## Development Workflow
 
@@ -126,7 +126,7 @@ bun run lint
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `TAMBO_API_KEY` | Your Tambo AI API key | Yes |
+| `NEXT_PUBLIC_TAMBO_API_KEY` | Your Tambo AI API key | Yes |
 | `NEXT_PUBLIC_TAMBO_URL` | Tambo API endpoint | Yes |
 | `GITHUB_TOKEN` | GitHub Personal Access Token | Yes |
 
@@ -137,7 +137,7 @@ bun run lint
 **1. "Invalid API Key" Error**
 - Verify your Tambo API key is correct
 - Ensure the key has proper permissions
-- Check that `TAMBO_API_KEY` is set in `.env`
+- Check that `NEXT_PUBLIC_TAMBO_API_KEY` is set in `.env`
 
 **2. GitHub API Rate Limiting**
 - Ensure your GitHub token is valid
