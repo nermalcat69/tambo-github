@@ -7,6 +7,8 @@ A natural language interface for basic GitHub operations powered by [Tambo AI](h
 
 ## Demo
 
+https://github.com/user-attachments/assets/4af35274-7c53-42c7-b725-11622598ef28
+
 
 ## Setup
 
