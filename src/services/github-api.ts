@@ -13,7 +13,7 @@ import {
   githubPRSchema,
   githubCommitSchema,
   githubBranchSchema,
-} from "@/lib/types";
+} from "../lib/types";
 
 class GitHubAPIError extends Error {
   constructor(message: string, public status?: number) {

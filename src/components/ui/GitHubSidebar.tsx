@@ -1,6 +1,6 @@
 "use client";
 
-import { GitHubRepo, GitHubIssue, GitHubPR } from "@/lib/types";
+import { GitHubRepo, GitHubIssue, GitHubPR } from "../../lib/types";
 import { Star, GitFork, Eye, Settings, ExternalLink } from "lucide-react";
 
 interface GitHubSidebarProps {

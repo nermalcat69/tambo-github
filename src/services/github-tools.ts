@@ -5,7 +5,7 @@ import {
   issuesInputSchema,
   prsInputSchema,
   commitsInputSchema,
-} from "@/lib/types";
+} from "../lib/types";
 
 // Repository Tools
 export const getRepository = async (input: z.infer<typeof repoInputSchema>) => {

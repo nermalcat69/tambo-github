@@ -5,15 +5,15 @@
 
 import { z } from "zod";
 import type { TamboComponent, TamboTool } from "@tambo-ai/react";
-import { RepoCard } from "@/components/ui/RepoCard";
-import { PRCard } from "@/components/ui/PRCard";
-import { IssueCard } from "@/components/ui/IssueCard";
-import { ObjectRenderer } from "@/components/ui/ObjectRenderer";
-import { GridLayout } from "@/components/ui/GridLayout";
-import { HealthGauge, HealthDashboard } from "@/components/ui/HealthGauge";
-import { Timeline } from "@/components/ui/Timeline";
-import { ReleaseNotes } from "@/components/ui/ReleaseNotes";
-import { githubRepoSchema, githubIssueSchema, githubPRSchema } from "@/lib/types";
+import { RepoCard } from "../components/ui/RepoCard";
+import { PRCard } from "../components/ui/PRCard";
+import { IssueCard } from "../components/ui/IssueCard";
+import { ObjectRenderer } from "../components/ui/ObjectRenderer";
+import { GridLayout } from "../components/ui/GridLayout";
+import { HealthGauge, HealthDashboard } from "../components/ui/HealthGauge";
+import { Timeline } from "../components/ui/Timeline";
+import { ReleaseNotes } from "../components/ui/ReleaseNotes";
+import { githubRepoSchema, githubIssueSchema, githubPRSchema } from "./types";
 import {
   getRepository,
   searchRepositories,
@@ -28,8 +28,8 @@ import {
   addIssueComment,
   addIssueLabels,
   testGitHubAPI,
-} from "@/services/github-tools";
-import { resolveGitHubIntent } from "@/services/resolve-github-intent";
+} from "../services/github-tools";
+import { resolveGitHubIntent } from "../services/resolve-github-intent";
 
 
 /* -------------------------------------------------------------------------- */

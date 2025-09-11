@@ -1,6 +1,6 @@
 "use client";
 
-import { GitHubCommit, GitHubIssue, GitHubPR } from "@/lib/types";
+import { GitHubCommit, GitHubIssue, GitHubPR } from "../../lib/types";
 import { GitCommit, AlertCircle, GitPullRequest, Calendar, User } from "lucide-react";
 
 type TimelineItem = {
